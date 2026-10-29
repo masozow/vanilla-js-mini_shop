@@ -1,5 +1,6 @@
 import { debounce } from "./shared/utils/debounce.js";
 import { httpClient } from "./shared/utils/infrastructure/HttpClient.js";
+import { ApiProductRespository } from "./features/product/infrastructure/ApiProductRepository.js";
 document.addEventListener('DOMContentLoaded', () => {
     const error_prefix = '[Main] ';
     try {
@@ -12,12 +13,9 @@ document.addEventListener('DOMContentLoaded', () => {
         const total = document.getElementById('total');
         //#endregion
         //#region SearchLogic
-        const baseUrl = 'https://dummyjson.com/products/search?q='
-        const error_prefix = '[Search] ';
+        const { getItems } = ApiProductRespository({ httpClient });
         const handleSearch = async (query) => {
-            if (!query.trim()) return;
-            const url = baseUrl + query;
-            const response = await httpClient({ url });
+            const response = await getItems(query);
             console.log(response);
         }
         const debouncedSearch = debounce(async (query) => handleSearch(query), 500);

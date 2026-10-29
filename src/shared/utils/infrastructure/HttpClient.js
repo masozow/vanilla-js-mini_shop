@@ -14,7 +14,7 @@ export const httpClient = async ({ url, options = {}, fetch = window.fetch }) =>
         }
         const response = await fetch(url, config);
         if (!response.ok) throw new Error(`${error_prefix} Status: ${response.status} - ${response.text} at ${url}`);
-        return await response.json();
+        return response.json();
     } catch (error) {
         console.error(error_prefix, error);
         throw error;

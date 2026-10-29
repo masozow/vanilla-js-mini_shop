@@ -1,0 +1,1 @@
+export const baseAPIUrl = 'https://dummyjson.com/products/search?q=';
