@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
@@ -15,8 +15,31 @@
   </head>
   <body>
     <main>
-      <section id="products"></section>
-      <section id="cart"></section>
+      <section id="products" class="">
+        <div id="search-box" class="controls">
+          <label for="products-search" id="products-search-label"
+            >Search products</label
+          >
+          <input
+            id="products-search"
+            type="search"
+            placeholder="Search products..."
+          />
+        </div>
+        <div id="product-results" aria-live="polite"></div>
+      </section>
+      <section id="cart" class="cart-section">
+        <h1>Cart</h1>
+        <div id="cart-results"></div>
+        <div id="summary" class="cart-totals">
+          <p>Subtotal</p>
+          <p id="subtotal">0.00</p>
+          <p>Discount</p>
+          <p id="discount">0.00</p>
+          <p>Total</p>
+          <p id="total">0.00</p>
+        </div>
+      </section>
     </main>
   </body>
 </html>

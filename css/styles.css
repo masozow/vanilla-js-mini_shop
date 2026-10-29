@@ -1,5 +1,61 @@
-main {
+body {
     background-color: rgb(40, 40, 40);
     border-color: #ccc;
     color: #ccc;
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+}
+
+main {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1rem;
+    place-items: center;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+@media (min-width:48rem) {
+    main {
+        grid-template-columns: 2fr 1fr;
+    }
+}
+
+main section {
+    display: grid;
+    grid-template-columns: 1fr;
+    align-self: start;
+    justify-items: stretch;
+    gap: 1rem;
+    width: 100%;
+}
+
+.cart-section {
+    grid-template-rows: auto 1fr auto;
+    height: 95vh;
+}
+
+section h1 {
+    padding: 0;
+    margin: 0;
+}
+
+section .controls {
+    align-self: center;
+    justify-self: center;
+}
+
+.cart-totals {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0;
+}
+
+.cart-totals p {
+    padding: 0;
+    margin: 0;
+}
+
+.cart-totals p:nth-of-type(even) {
+    align-self: end;
+    justify-self: end;
 }
