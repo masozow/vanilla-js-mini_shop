@@ -1,7 +1,7 @@
 import { debounce } from "./shared/utils/debounce.js";
 import { HttpClient } from "./shared/infrastructure/HttpClient.js";
 import { ApiProductRespository } from "./features/product/infrastructure/ApiProductRepository.js";
-import { esc } from "./shared/utils/escapeHTML.js";
+import { ProductCard } from "./features/product/ui/components/ProductCard.js";
 document.addEventListener('DOMContentLoaded', () => {
     const error_prefix = '[Main] ';
     try {
@@ -13,11 +13,20 @@ document.addEventListener('DOMContentLoaded', () => {
         const discount = document.getElementById('discount');
         const total = document.getElementById('total');
         //#endregion
+        //#region UI logic
+        const renderGrid = (data) => {
+            return `
+            <div class="grid">
+                ${data.map((d) => ProductCard(d)).join('')}
+            </div > 
+            `;
+        }
+        //#endregion
         //#region SearchLogic
         const { getItems } = ApiProductRespository({ httpClient: HttpClient });
         const handleSearch = async (query) => {
             const response = await getItems(query);
-            console.log(response);
+            productResults.innerHTML = renderGrid(response);
         }
         const debouncedSearch = debounce(async (query) => handleSearch(query), 500);
         productSearch.addEventListener('input', async (e) => {
@@ -28,4 +37,4 @@ document.addEventListener('DOMContentLoaded', () => {
         console.error(error_prefix, error);
     }
 });
-await import('./shared/test/index.js');
+// await import('./shared/test/index.js');
