@@ -1,6 +1,7 @@
 import { debounce } from "./shared/utils/debounce.js";
 import { HttpClient } from "./shared/infrastructure/HttpClient.js";
 import { ApiProductRespository } from "./features/product/infrastructure/ApiProductRepository.js";
+import { ProductService } from "./features/product/application/ProductService.js";
 import { ProductCard } from "./features/product/ui/components/ProductCard.js";
 document.addEventListener('DOMContentLoaded', () => {
     const error_prefix = '[Main] ';
@@ -23,11 +24,19 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         //#endregion
         //#region SearchLogic
-        const { getItems } = ApiProductRespository({ httpClient: HttpClient });
+        const productRepo = ApiProductRespository({ httpClient: HttpClient });
+        const { search, subscribe } = ProductService({ productRepo });
         const handleSearch = async (query) => {
-            const response = await getItems(query);
-            productResults.innerHTML = renderGrid(response);
+            await search(query);
         }
+        let stateChangeId = 0;
+        subscribe((state) => {
+            console.group(`StateChangeId: ${++stateChangeId}`);
+            console.log(state);
+            console.groupEnd();
+            productResults.innerHTML = renderGrid(state.products);
+
+        })
         const debouncedSearch = debounce(async (query) => handleSearch(query), 500);
         productSearch.addEventListener('input', async (e) => {
             debouncedSearch(e.target.value)

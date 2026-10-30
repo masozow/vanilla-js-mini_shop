@@ -1,4 +1,4 @@
-export const ProductService = async ({ productRepo }) => {
+export const ProductService = ({ productRepo }) => {
     const error_prefix = '[Application error] ProductService. ';
     const validStatuses = Object.freeze({
         IDLE: 'idle',
@@ -21,8 +21,16 @@ export const ProductService = async ({ productRepo }) => {
     const getState = () => state;
     let reqId = 0;
     let lastQuery = '';
+    const listeners = new Set();
+    const notify = () => {
+        listeners.forEach((listener) => listener(getState()));
+    }
     return {
-
+        subscribe: (listenerCallback) => {
+            listeners.add(listenerCallback);
+            listenerCallback(getState());
+            return () => listeners.delete(listenerCallback);
+        },
         search: async (query) => {
             if (typeof query !== 'string') throw new Error(error_prefix, 'Query must be a string');
             const normalizedQuery = query.trim();
@@ -35,9 +43,10 @@ export const ProductService = async ({ productRepo }) => {
             if (lastQuery === normalizedQuery) return;
             lastQuery = normalizedQuery;
             setState({ products: [], status: LOADING });
+            notify();
             const currentReqId = ++reqId;
             try {
-                products = await getItems(query);
+                const products = await getItems(query);
                 if (currentReqId !== reqId) return;
                 if (products.length === 0 && !normalizedQuery) {
                     setState({ products: [...products], status: EMPTY })
@@ -47,6 +56,8 @@ export const ProductService = async ({ productRepo }) => {
             } catch (error) {
                 console.error(error_prefix, error);
                 setState({ products: [], status: ERROR })
+            } finally {
+                notify();
             }
         }
     }
