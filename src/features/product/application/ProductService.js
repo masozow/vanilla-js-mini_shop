@@ -14,17 +14,19 @@ export const ProductService = ({ productRepo }) => {
         status: IDLE
     })
     const state = { ...initialState };
+    const notify = () => {
+        listeners.forEach((listener) => listener(getState()));
+    }
     const setState = ({ products, status }) => {
         state.products = products;
         state.status = status;
+        notify(state);
     }
     const getState = () => state;
     let reqId = 0;
     let lastQuery = '';
     const listeners = new Set();
-    const notify = () => {
-        listeners.forEach((listener) => listener(getState()));
-    }
+
     return {
         subscribe: (listenerCallback) => {
             listeners.add(listenerCallback);
@@ -43,7 +45,6 @@ export const ProductService = ({ productRepo }) => {
             if (lastQuery === normalizedQuery) return;
             lastQuery = normalizedQuery;
             setState({ products: [], status: LOADING });
-            notify();
             const currentReqId = ++reqId;
             try {
                 const products = await getItems(query);
@@ -56,8 +57,6 @@ export const ProductService = ({ productRepo }) => {
             } catch (error) {
                 console.error(error_prefix, error);
                 setState({ products: [], status: ERROR })
-            } finally {
-                notify();
             }
         }
     }

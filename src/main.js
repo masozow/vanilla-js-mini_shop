@@ -7,14 +7,16 @@ document.addEventListener('DOMContentLoaded', () => {
     const error_prefix = '[Main] ';
     try {
         //#region DOM elements
+        const productSearch = document.getElementById('product-search');
         const productResults = document.getElementById('product-results');
         const cartResults = document.getElementById('cart-results');
-        const productSearch = document.getElementById('product-search');
         const subtotal = document.getElementById('subtotal');
         const discount = document.getElementById('discount');
         const total = document.getElementById('total');
         //#endregion
         //#region UI logic
+        const productRepo = ApiProductRespository({ httpClient: HttpClient });
+        const { search, subscribe } = ProductService({ productRepo });
         const renderGrid = (data) => {
             return `
             <div class="grid">
@@ -22,22 +24,12 @@ document.addEventListener('DOMContentLoaded', () => {
             </div > 
             `;
         }
+        subscribe((state) => {
+            productResults.innerHTML = renderGrid(state.products);
+        })
         //#endregion
         //#region SearchLogic
-        const productRepo = ApiProductRespository({ httpClient: HttpClient });
-        const { search, subscribe } = ProductService({ productRepo });
-        const handleSearch = async (query) => {
-            await search(query);
-        }
-        let stateChangeId = 0;
-        subscribe((state) => {
-            console.group(`StateChangeId: ${++stateChangeId}`);
-            console.log(state);
-            console.groupEnd();
-            productResults.innerHTML = renderGrid(state.products);
-
-        })
-        const debouncedSearch = debounce(async (query) => handleSearch(query), 500);
+        const debouncedSearch = debounce(async (query) => await search(query), 500);
         productSearch.addEventListener('input', async (e) => {
             debouncedSearch(e.target.value)
         })
