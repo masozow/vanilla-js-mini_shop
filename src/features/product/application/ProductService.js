@@ -33,9 +33,9 @@ export const ProductService = async ({ productRepo }) => {
                 return;
             }
             if (lastQuery === normalizedQuery) return;
-            setState({ products: [], status: LOADING });
-            let currentReqId = ++reqId;
             lastQuery = normalizedQuery;
+            setState({ products: [], status: LOADING });
+            const currentReqId = ++reqId;
             try {
                 products = await getItems(query);
                 if (currentReqId !== reqId) return;
@@ -43,7 +43,7 @@ export const ProductService = async ({ productRepo }) => {
                     setState({ products: [...products], status: EMPTY })
                     return;
                 }
-                state.products = [...products];
+                setState({ products, status: SUCCESS });
             } catch (error) {
                 console.error(error_prefix, error);
                 setState({ products: [], status: ERROR })
