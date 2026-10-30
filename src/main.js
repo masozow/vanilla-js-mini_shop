@@ -1,6 +1,7 @@
 import { debounce } from "./shared/utils/debounce.js";
-import { httpClient } from "./shared/utils/infrastructure/HttpClient.js";
+import { httpClient } from "./shared/infrastructure/HttpClient.js";
 import { ApiProductRespository } from "./features/product/infrastructure/ApiProductRepository.js";
+import { esc } from "./shared/utils/escapeHTML.js";
 document.addEventListener('DOMContentLoaded', () => {
     const error_prefix = '[Main] ';
     try {
@@ -22,9 +23,9 @@ document.addEventListener('DOMContentLoaded', () => {
         productSearch.addEventListener('input', async (e) => {
             debouncedSearch(e.target.value)
         })
-
         //#endregion
     } catch (error) {
         console.error(error_prefix, error);
     }
 });
+// import('./shared/test/index.js');
