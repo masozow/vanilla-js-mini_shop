@@ -1,5 +1,5 @@
 import { debounce } from "./shared/utils/debounce.js";
-import { httpClient } from "./shared/infrastructure/HttpClient.js";
+import { HttpClient } from "./shared/infrastructure/HttpClient.js";
 import { ApiProductRespository } from "./features/product/infrastructure/ApiProductRepository.js";
 import { esc } from "./shared/utils/escapeHTML.js";
 document.addEventListener('DOMContentLoaded', () => {
@@ -14,7 +14,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const total = document.getElementById('total');
         //#endregion
         //#region SearchLogic
-        const { getItems } = ApiProductRespository({ httpClient });
+        const { getItems } = ApiProductRespository({ httpClient: HttpClient });
         const handleSearch = async (query) => {
             const response = await getItems(query);
             console.log(response);
@@ -28,4 +28,4 @@ document.addEventListener('DOMContentLoaded', () => {
         console.error(error_prefix, error);
     }
 });
-// import('./shared/test/index.js');
+import('./shared/test/index.js');
