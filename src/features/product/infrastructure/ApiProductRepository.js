@@ -1,6 +1,6 @@
 import { Product } from "../domain/Product.js";
 import { baseAPIUrl } from "../../../shared/dictionaries/ApiURLs.js";
-export const ApiProductRespository = ({ httpClient }) => {
+export const ApiProductRepository = ({ httpClient }) => {
     const error_prefix = '[Infra error] ApiProductRepository';
     return {
         getItems: async (query) => {

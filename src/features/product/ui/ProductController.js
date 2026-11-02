@@ -1,18 +1,16 @@
-import { debounce } from "../../../shared/utils/debounce.js"
-import { RenderStatuses } from "../../../shared/ui/components/RenderStatuses.js";
-import { validStatuses } from "../../../shared/dictionaries/validStatuses.js";
-import { ProductView } from "./ProductView.js";
-export const ProductController = ({ service, dom }) => {
+export const ProductController = ({ service }) => {
     const error_prefix = '[UI error] ProductController. ';
-    const { productResults, productSearch } = dom;
-    if (!productResults) throw new Error(error_prefix + 'productResults is required.');
-    if (!productSearch) throw new Error(error_prefix, 'productSearch is required.');
     const { search, subscribe } = service;
-    const { isLoading, isError, isEmpty, isIdle, isSuccess } = RenderStatuses(productResults);
-    const { renderProductsGrid } = ProductView();
-    const { IDLE, EMPTY, LOADING, ERROR, SUCCESS } = validStatuses;
     return {
-        productUI: () => {
+        renderResults: async (resultsHTMLComponent) => {
+            if (!resultsHTMLComponent)
+                throw new Error(error_prefix + 'HTML node to render results is required.');
+            const { RenderStatuses } = await import("../../../shared/ui/components/RenderStatuses.js");
+            const { validStatuses } = await import("../../../shared/dictionaries/validStatuses.js");
+            const { ProductView } = await import("./ProductView.js");
+            const { isLoading, isError, isEmpty, isIdle, isSuccess } = RenderStatuses(resultsHTMLComponent);
+            const { IDLE, EMPTY, LOADING, ERROR, SUCCESS } = validStatuses;
+            const { renderProductsGrid } = ProductView();
             //#region UI logic
             subscribe((state) => {
                 switch (state.status) {
@@ -23,13 +21,15 @@ export const ProductController = ({ service, dom }) => {
                     case IDLE: isIdle('products'); break;
                 }
             })
-            //#endregion
-            //#region SearchLogic
+        },
+        searchProducts: async (searchInput) => {
+            if (!searchInput)
+                throw new Error(error_prefix, 'HTML search input element is required.');
+            const { debounce } = await import("../../../shared/utils/debounce.js");
             const debouncedSearch = debounce(async (query) => await search(query), 500);
-            productSearch.addEventListener('input', async (e) => {
+            searchInput.addEventListener('input', async (e) => {
                 debouncedSearch(e.target.value)
             })
-            //#endregion
         }
     }
 }

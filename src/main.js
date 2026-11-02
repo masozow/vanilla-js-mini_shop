@@ -1,8 +1,5 @@
-import { HttpClient } from "./shared/infrastructure/HttpClient.js";
-import { ApiProductRespository } from "./features/product/infrastructure/ApiProductRepository.js";
-import { ProductService } from "./features/product/application/ProductService.js";
-import { ProductController } from "./features/product/ui/ProductController.js";
-document.addEventListener('DOMContentLoaded', () => {
+import { ProductModule } from "./features/product/ProductModule.js";
+document.addEventListener('DOMContentLoaded', async () => {
     const error_prefix = '[Main] ';
     try {
         //#region DOM elements
@@ -14,16 +11,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const total = document.getElementById('total');
         //#endregion
         //Glueing code
-        const productRepo = ApiProductRespository({ httpClient: HttpClient });
-        const productService = ProductService({ productRepo });
-        const { productUI } = ProductController({
-            dom: {
-                productResults,
-                productSearch
-            },
-            service: productService
-        })
-        productUI();
+        await ProductModule({ productResults, productSearch });
 
     } catch (error) {
         console.error(error_prefix, error);
