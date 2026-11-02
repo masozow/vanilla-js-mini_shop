@@ -1,5 +1,5 @@
-import { CardsGrid } from "./CardsGrid.js";
-export const RenderResults = (results) => {
+
+export const RenderStatuses = (results) => {
     const error_prefix = '[Shared UI] UIStates. ';
     if (!results) throw new Error(error_prefix + 'Results HTML element is required.');
     return {
@@ -27,8 +27,8 @@ export const RenderResults = (results) => {
                     Search for some${featureName ? ' ' + featureName : 'thing'}.
                 </p>`
         },
-        renderGrid: ({ data, Component }) => {
-            results.innerHTML = CardsGrid({ data, Component });
+        isSuccess: ({ renderLayout }) => {
+            results.innerHTML = renderLayout;
         }
     }
 

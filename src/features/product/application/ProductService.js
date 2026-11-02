@@ -1,7 +1,6 @@
 import { validStatuses } from "../../../shared/dictionaries/validStatuses.js";
 export const ProductService = ({ productRepo }) => {
     const error_prefix = '[Application error] ProductService. ';
-
     const { getItems } = productRepo;
     const { IDLE, ERROR, LOADING, SUCCESS, EMPTY } = validStatuses;
     const initialState = Object.freeze({
