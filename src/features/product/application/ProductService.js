@@ -3,7 +3,7 @@ export const ProductService = ({ productRepo }) => {
     const validStatuses = Object.freeze({
         IDLE: 'idle',
         ERROR: 'error',
-        LOADING: 'laoding',
+        LOADING: 'loading',
         SUCCESS: 'success',
         EMPTY: 'empty'
     })
@@ -20,9 +20,9 @@ export const ProductService = ({ productRepo }) => {
     const setState = ({ products, status }) => {
         state.products = products;
         state.status = status;
-        notify(state);
+        notify();
     }
-    const getState = () => state;
+    const getState = () => ({ ...state });
     let reqId = 0;
     let lastQuery = '';
     const listeners = new Set();
@@ -37,7 +37,7 @@ export const ProductService = ({ productRepo }) => {
             if (typeof query !== 'string') throw new Error(error_prefix, 'Query must be a string');
             const normalizedQuery = query.trim();
             if (normalizedQuery === '') {
-                setState({ ...initialState });
+                setState({ products: [], status: IDLE });
                 lastQuery = '';
                 ++reqId;
                 return;
@@ -49,12 +49,13 @@ export const ProductService = ({ productRepo }) => {
             try {
                 const products = await getItems(query);
                 if (currentReqId !== reqId) return;
-                if (products.length === 0 && !normalizedQuery) {
-                    setState({ products: [...products], status: EMPTY })
+                if (products.length === 0 && normalizedQuery) {
+                    setState({ products: [], status: EMPTY })
                     return;
                 }
                 setState({ products, status: SUCCESS });
             } catch (error) {
+                if (currentReqId !== reqId) return;
                 console.error(error_prefix, error);
                 setState({ products: [], status: ERROR })
             }

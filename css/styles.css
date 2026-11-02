@@ -57,6 +57,8 @@ section .controls {
 }
 
 .product-results {
+    height: 90vh;
+    max-height: initial;
     overflow-y: scroll;
 }
 
