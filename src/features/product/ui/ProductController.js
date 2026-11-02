@@ -19,7 +19,7 @@ export const ProductController = ({ service, dom }) => {
                     case EMPTY: isEmpty(); break;
                     case LOADING: isLoading('products'); break;
                     case ERROR: isError(); break;
-                    case SUCCESS: isSuccess({ renderLayout: renderProductsGrid(state.products) }); break;
+                    case SUCCESS: isSuccess(renderProductsGrid(state.products)); break;
                     case IDLE: isIdle('products'); break;
                 }
             })

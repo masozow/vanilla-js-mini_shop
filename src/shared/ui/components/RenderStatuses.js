@@ -27,7 +27,7 @@ export const RenderStatuses = (results) => {
                     Search for some${featureName ? ' ' + featureName : 'thing'}.
                 </p>`
         },
-        isSuccess: ({ renderLayout }) => {
+        isSuccess: (renderLayout) => {
             results.innerHTML = renderLayout;
         }
     }
