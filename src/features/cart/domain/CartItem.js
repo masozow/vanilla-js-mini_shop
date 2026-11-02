@@ -1,4 +1,4 @@
-export const CartItem = ({ id, name, price, quantity }) => {
+export const CartItem = ({ id, name, price, quantity, isDisabled = false }) => {
     const error_prefix = '[Domain error] CartItem. ';
     if (!id || !name || price === undefined || quantity === undefined)
         throw new Error(error_prefix + ' Some of the required fields is missing.');
@@ -9,6 +9,7 @@ export const CartItem = ({ id, name, price, quantity }) => {
         quantity: _quantity / 100,
         name,
         price: _price / 100,
+        isDisabled,
         subTotal: Number(_quantity * _price) / 10000
     }
     return item;

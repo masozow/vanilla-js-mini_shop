@@ -32,6 +32,9 @@ main section {
 .cart-section {
     grid-template-rows: auto 1fr auto;
     min-height: 95vh;
+    width: 100%;
+    padding: 0;
+    margin: 0;
 }
 
 .cart-results {
@@ -86,6 +89,54 @@ section .controls {
 
 .cart-totals p:nth-of-type(even) {
     justify-self: end;
+}
+
+.cart-row {
+    grid-column: span 2;
+    display: grid;
+    grid-template-columns: 1fr 4fr 3fr;
+    gap: 0.5rem;
+    width: 100%;
+}
+
+.cart-row:nth-of-type(even) {
+    background-color: rgba(1, 1, 1, 0.2);
+}
+
+.cart-row .numbers {
+    justify-self: right;
+    text-align: right;
+}
+
+.numbers p:last-of-type {
+    font-weight: bolder;
+    font-size: large;
+}
+
+.cart-row>:first-child {
+    align-self: center;
+    justify-self: center;
+}
+
+.cart-row button {
+    border-radius: 50%;
+    height: 1.5rem;
+    width: 1.5rem;
+    background-color: rgba(1, 1, 1, 0);
+    color: #ccc;
+    border: 1px solid #ccc;
+    cursor: pointer;
+}
+
+.cart-row-disabled {
+    font-weight: 100;
+    opacity: 0.5;
+    filter: grayscale(1);
+    pointer-events: none;
+}
+
+button:hover {
+    background-color: rgba(163, 255, 252, 0.5);
 }
 
 .grid {

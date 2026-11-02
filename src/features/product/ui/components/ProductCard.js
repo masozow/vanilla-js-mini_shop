@@ -1,12 +1,12 @@
 import { esc } from "../../../../shared/utils/escapeHTML.js";
 export const ProductCard = (product) => {
-    const { id, title, thumbnail, inCart, outOfStock, dimensions, ...rest } = product;
+    const { id, title, thumbnail, picked, outOfStock, dimensions, ...rest } = product;
     const { width, height } = dimensions;
     const presentationData = {
         dataComponent: 'product-card',
-        activeClass: 'inCart',
+        activeClass: 'picked',
         disabledClass: 'disabled-card',
-        btnText: (noStock, isInCart) => noStock ? 'Out of stock' : (isInCart ? 'Add more' : 'Add')
+        btnText: (noStock, picked) => noStock ? 'Out of stock' : (picked ? 'Add more' : 'Add')
     }
     return `
     <article 
@@ -15,7 +15,7 @@ export const ProductCard = (product) => {
         data-active-class="${presentationData.activeClass}"
         data-disabled-class="${presentationData.disabledClass}"
         class='card 
-        ${inCart ? presentationData.activeClass : ''}
+        ${picked ? presentationData.activeClass : ''}
         ${outOfStock ? presentationData.disabledClass : ''}
         '>
         <h3>${esc(title)}</h3>
@@ -32,14 +32,14 @@ export const ProductCard = (product) => {
         heigth="${esc(height)}"
         />
         <button 
-        data-action='add-to-cart'
+        data-action='pick'
         data-active-text="${presentationData.btnText(false, true)}"
         data-inactive-text="${presentationData.btnText(false, false)}"
         data-outOfStock-text="${presentationData.btnText(true, false)}"
-        aria-pressed="${inCart ? 'true' : 'false'}"
+        aria-pressed="${picked ? 'true' : 'false'}"
         ${outOfStock ? 'disabled' : ''}
         >
-        ${presentationData.btnText(outOfStock, inCart)}
+        ${presentationData.btnText(outOfStock, picked)}
         </button>
     </article>
     `;

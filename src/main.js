@@ -1,4 +1,6 @@
 import { ProductModule } from "./features/product/ProductModule.js";
+import { CartItem } from "./features/cart/domain/CartItem.js";
+import { CartRow } from "./features/cart/ui/components/CartRow.js";
 document.addEventListener('DOMContentLoaded', async () => {
     const error_prefix = '[Main] ';
     try {
@@ -12,6 +14,48 @@ document.addEventListener('DOMContentLoaded', async () => {
         //#endregion
         //Glueing code
         await ProductModule({ productResults, productSearch });
+        //#region Cart
+        const Items = [{
+            id: 1,
+            name: 'Apple MagSafe Battery Pack - Apple',
+            price: '99.99',
+            quantity: '5'
+        },
+        {
+            id: 2,
+            name: 'Beats Flex Wireless Earphones - Beats',
+            price: '49.99',
+            quantity: '50',
+            isDisabled: true
+        },
+        {
+            id: 3,
+            name: 'Selfie Stick Monopod - SnapTech',
+            price: '12.99',
+            quantity: '11',
+            isDisabled: true
+        },
+        {
+            id: 4,
+            name: 'iPhone X - Apple',
+            price: '899.99',
+            quantity: '37'
+        },
+        {
+            id: 5,
+            name: 'Essence Mascara Lash Princess - Essence',
+            price: '9.99',
+            quantity: '9'
+        }
+
+        ]
+        const CartItems = Items.map((item) => CartItem(item));
+        console.log(CartItems);
+        const CartRows = CartItems.map((item) =>
+            CartRow(item)
+        );
+        cartResults.innerHTML = CartRows.join('');
+        //#endregion
 
     } catch (error) {
         console.error(error_prefix, error);
