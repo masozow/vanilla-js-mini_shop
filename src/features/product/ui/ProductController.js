@@ -1,19 +1,27 @@
-import { CardsGrid } from "../../../shared/ui/components/CardsGrid.js";
-import { ProductCard } from "./components/ProductCard.js";
 import { debounce } from "../../../shared/utils/debounce.js"
+import { RenderResults } from "../../../shared/ui/components/RenderResults.js";
+import { validStatuses } from "../../../shared/dictionaries/validStatuses.js";
+import { ProductCard } from "./components/ProductCard.js";
+
 export const ProductController = ({ service, dom }) => {
     const error_prefix = '[UI error] ProductController. ';
     const { productResults, productSearch } = dom;
-    const { search, subscribe } = service;
     if (!productResults) throw new Error(error_prefix + 'productResults is required.');
-    const renderGrid = (state) => {
-        productResults.innerHTML = CardsGrid({ data: state.products, Component: ProductCard });
-    }
+    if (!productSearch) throw new Error(error_prefix, 'productSearch is required.');
+    const { search, subscribe } = service;
+    const { isLoading, isError, isEmpty, isIdle, renderGrid } = RenderResults(productResults);
+    const { IDLE, EMPTY, LOADING, ERROR, SUCCESS } = validStatuses;
     return {
         productUI: () => {
             //#region UI logic
             subscribe((state) => {
-                renderGrid(state);
+                switch (state.status) {
+                    case EMPTY: isEmpty(); break;
+                    case LOADING: isLoading('products'); break;
+                    case ERROR: isError(); break;
+                    case SUCCESS: renderGrid({ data: state.products, Component: ProductCard }); break;
+                    case IDLE: isIdle('products'); break;
+                }
             })
             //#endregion
             //#region SearchLogic

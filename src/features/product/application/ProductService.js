@@ -1,12 +1,7 @@
+import { validStatuses } from "../../../shared/dictionaries/validStatuses.js";
 export const ProductService = ({ productRepo }) => {
     const error_prefix = '[Application error] ProductService. ';
-    const validStatuses = Object.freeze({
-        IDLE: 'idle',
-        ERROR: 'error',
-        LOADING: 'loading',
-        SUCCESS: 'success',
-        EMPTY: 'empty'
-    })
+
     const { getItems } = productRepo;
     const { IDLE, ERROR, LOADING, SUCCESS, EMPTY } = validStatuses;
     const initialState = Object.freeze({
