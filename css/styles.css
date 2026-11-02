@@ -70,6 +70,7 @@ section .controls {
     height: 90vh;
     max-height: initial;
     overflow-y: scroll;
+    scrollbar-darkshadow-color: rgb(40, 40, 40);
 }
 
 .cart-totals {

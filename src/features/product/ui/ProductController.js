@@ -27,7 +27,7 @@ export const ProductController = ({ service }) => {
                 throw new Error(error_prefix, 'HTML search input element is required.');
             const { debounce } = await import("../../../shared/utils/debounce.js");
             const debouncedSearch = debounce(async (query) => await search(query), 500);
-            searchInput.addEventListener('input', async (e) => {
+            searchInput.addEventListener('input', (e) => {
                 debouncedSearch(e.target.value)
             })
         }
