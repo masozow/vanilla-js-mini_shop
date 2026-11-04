@@ -31,16 +31,27 @@ export const ProductCard = (product) => {
         width="${esc(width)}"
         heigth="${esc(height)}"
         />
+        <div>
+            <label for="quantity-${esc(id)}">Qty.:</label>
+            <input 
+                id="quantity-${esc(id)}"
+                type="number"
+                min="1"
+                value="1"
+                max=${Number(esc(rest.stock))}
+            />
+        </div>
         <button 
-        data-action='pick'
-        data-active-text="${presentationData.btnText(false, true)}"
-        data-inactive-text="${presentationData.btnText(false, false)}"
-        data-outOfStock-text="${presentationData.btnText(true, false)}"
-        aria-pressed="${picked ? 'true' : 'false'}"
-        ${outOfStock ? 'disabled' : ''}
+            data-action='pick'
+            data-active-text="${presentationData.btnText(false, true)}"
+            data-inactive-text="${presentationData.btnText(false, false)}"
+            data-outOfStock-text="${presentationData.btnText(true, false)}"
+            aria-pressed="${picked ? 'true' : 'false'}"
+            ${outOfStock ? 'disabled' : ''}
         >
-        ${presentationData.btnText(outOfStock, picked)}
+            ${presentationData.btnText(outOfStock, picked)}
         </button>
+        
     </article>
     `;
 };

@@ -154,8 +154,7 @@ button:hover {
 
 .card h3,
 .card .price,
-.card img,
-.card button {
+.card img {
     grid-column: span 2;
     justify-self: center;
     align-self: center;
@@ -165,10 +164,9 @@ button:hover {
     background-color: turquoise;
     color: rgb(40, 40, 40);
     width: 100%;
-    padding: 0.5rem;
+    padding: 0 0.5rem;
     font-size: large;
     font-weight: bold;
-    margin-top: 0.5rem;
     cursor: pointer;
 }
 
@@ -209,4 +207,11 @@ button:hover {
 
 .card p:nth-of-type(odd) {
     font-weight: bolder;
+}
+
+.card .quantity {
+    display: flex;
+    gap: 1rem;
+    justify-content: space-between;
+    max-width: 100%;
 }

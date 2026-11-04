@@ -33,15 +33,13 @@ export const ProductController = ({ service, resultsHTMLComponent }) => {
         },
         pickProduct: () => {
             const actions = {
-                'pick': (id) => console.dir(id)
+                'pick': (id) => togglePick(Number(id))
             }
             resultsHTMLComponent.addEventListener('click', (e) => {
                 const btn = e.target.closest('[data-action]')
                 if (!btn) return;
-                console.dir(btn);
                 const card = btn.closest('[data-component="product-card"]')
                 if (!card) return;
-                console.dir(card);
                 const id = Number(card.dataset.id);
                 const action = actions[btn.dataset.action];
                 action(id);

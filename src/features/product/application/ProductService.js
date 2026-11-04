@@ -9,10 +9,15 @@ export const ProductService = ({ productRepo }) => {
         products: [],
         status: IDLE
     }
+    const pickedProducts = new Set();
     const productSignal = createSignal(initialState);
+    const lastPickedProductSignal = createSignal({});
     let reqId = 0;
     let lastQuery = '';
-
+    const viewState = () => {
+        const currentProducts = productSignal.get();
+        return currentProducts.map((product) => pickedProducts.has(product));
+    }
     return {
         onProductChange: productSignal.subscribe,
         search: async (query) => {
@@ -42,11 +47,15 @@ export const ProductService = ({ productRepo }) => {
                 productSignal.set({ products: [], status: ERROR })
             }
         },
-        togglePick: (productId) => {
+        setPick: (productId, isPicked = true) => {
             if (!productId) throw new Error(error_prefix + 'productId is required.');
-            const products = productSignal.get();
-            let isProductPicked = products.filter(product => product.id === productId).picked;
-            console.log(isProductPicked);
+            const currentProducts = productSignal.get().products;
+            const indexOfProductId = currentProducts.findIndex(product => product.id === productId);
+            if (indexOfProductId === -1) return;
+            const clickedProduct = currentProducts[indexOfProductId];
+            const pickedProduct = { ...clickedProduct, picked: isPicked };
+            pickedProducts.add(pickedProduct);
+            lastPickedProductSignal.set(pickedProduct);
         }
     }
 
