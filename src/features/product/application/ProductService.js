@@ -9,42 +9,43 @@ export const ProductService = ({ productRepo }) => {
         products: [],
         status: IDLE
     }
-    const productsSignal = createSignal(initialState);
+    const productSignal = createSignal(initialState);
     let reqId = 0;
     let lastQuery = '';
 
     return {
-        onProductsChange: productsSignal.subscribe,
+        onProductsChange: productSignal.subscribe,
         search: async (query) => {
             if (typeof query !== 'string') throw new Error(error_prefix, 'Query must be a string');
             const normalizedQuery = query.trim();
             if (normalizedQuery === '') {
-                productsSignal.set({ products: [], status: IDLE })
+                productSignal.set({ products: [], status: IDLE })
                 lastQuery = '';
                 ++reqId;
                 return;
             }
             if (lastQuery === normalizedQuery) return;
             lastQuery = normalizedQuery;
-            productsSignal.set({ products: [], status: LOADING });
+            productSignal.set({ products: [], status: LOADING });
             const currentReqId = ++reqId;
             try {
                 const products = await getItems(query);
                 if (currentReqId !== reqId) return;
                 if (products.length === 0 && normalizedQuery) {
-                    productsSignal.set({ products: [], status: EMPTY })
+                    productSignal.set({ products: [], status: EMPTY })
                     return;
                 }
-                productsSignal.set({ products, status: SUCCESS })
+                productSignal.set({ products, status: SUCCESS })
             } catch (error) {
                 if (currentReqId !== reqId) return;
                 console.error(error_prefix, error);
-                productsSignal.set({ products: [], status: ERROR })
+                productSignal.set({ products: [], status: ERROR })
             }
         },
         togglePick: (productId) => {
             if (!productId) throw new Error(error_prefix + 'productId is required.');
-            let isProductPicked = state.products.filter(product => product.id === productId).picked;
+            const products = productSignal.get();
+            let isProductPicked = products.filter(product => product.id === productId).picked;
             console.log(isProductPicked);
         }
     }
