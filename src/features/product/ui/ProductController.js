@@ -1,8 +1,8 @@
-export const ProductController = ({ service }) => {
+export const ProductController = ({ service, resultsHTMLComponent }) => {
     const error_prefix = '[UI error] ProductController. ';
     const { search, onProductChange, togglePick } = service;
     return {
-        renderResults: async (resultsHTMLComponent) => {
+        renderResults: async () => {
             if (!resultsHTMLComponent)
                 throw new Error(error_prefix + 'HTML node to render results is required.');
             const { RenderStatuses } = await import("../../../shared/ui/components/RenderStatuses.js");
@@ -32,7 +32,20 @@ export const ProductController = ({ service }) => {
             })
         },
         pickProduct: () => {
-
+            const actions = {
+                'pick': (id) => console.dir(id)
+            }
+            resultsHTMLComponent.addEventListener('click', (e) => {
+                const btn = e.target.closest('[data-action]')
+                if (!btn) return;
+                console.dir(btn);
+                const card = btn.closest('[data-component="product-card"]')
+                if (!card) return;
+                console.dir(card);
+                const id = Number(card.dataset.id);
+                const action = actions[btn.dataset.action];
+                action(id);
+            });
         }
     }
 }

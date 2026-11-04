@@ -14,7 +14,7 @@ export const ProductService = ({ productRepo }) => {
     let lastQuery = '';
 
     return {
-        onProductsChange: productSignal.subscribe,
+        onProductChange: productSignal.subscribe,
         search: async (query) => {
             if (typeof query !== 'string') throw new Error(error_prefix, 'Query must be a string');
             const normalizedQuery = query.trim();

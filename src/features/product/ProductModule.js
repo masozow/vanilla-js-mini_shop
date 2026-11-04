@@ -7,9 +7,17 @@ export const ProductModule = async ({ productResults, productSearch }) => {
     try {
         const productRepo = ApiProductRepository({ httpClient: HttpClient });
         const productService = ProductService({ productRepo });
-        const { searchProducts, renderResults } = ProductController({ service: productService })
+        const {
+            searchProducts,
+            renderResults,
+            pickProduct
+        } = ProductController({
+            service: productService,
+            resultsHTMLComponent: productResults
+        })
         await searchProducts(productSearch);
         await renderResults(productResults)
+        pickProduct();
     } catch (error) {
         console.error(error_prefix, error);
     }

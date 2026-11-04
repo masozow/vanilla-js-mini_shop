@@ -51,7 +51,6 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         ]
         const CartItems = Items.map((item) => CartItem(item));
-        console.log(CartItems);
         const CartRows = CartItems.map((item) =>
             CartRow(item)
         );
