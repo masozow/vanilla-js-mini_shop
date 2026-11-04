@@ -1,6 +1,6 @@
 export const ProductController = ({ service }) => {
     const error_prefix = '[UI error] ProductController. ';
-    const { search, subscribe } = service;
+    const { search, subscribe, togglePick } = service;
     return {
         renderResults: async (resultsHTMLComponent) => {
             if (!resultsHTMLComponent)
@@ -30,6 +30,9 @@ export const ProductController = ({ service }) => {
             searchInput.addEventListener('input', (e) => {
                 debouncedSearch(e.target.value)
             })
+        },
+        pickProduct: () => {
+
         }
     }
 }

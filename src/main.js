@@ -1,6 +1,7 @@
 import { ProductModule } from "./features/product/ProductModule.js";
 import { CartItem } from "./features/cart/domain/CartItem.js";
 import { CartRow } from "./features/cart/ui/components/CartRow.js";
+import { LocalCartRepository } from "./features/cart/infrastructure/LocalCartRepository.js";
 document.addEventListener('DOMContentLoaded', async () => {
     const error_prefix = '[Main] ';
     try {
@@ -56,7 +57,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         );
         cartResults.innerHTML = CartRows.join('');
         //#endregion
-
     } catch (error) {
         console.error(error_prefix, error);
     }

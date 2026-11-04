@@ -53,6 +53,11 @@ export const ProductService = ({ productRepo }) => {
                 console.error(error_prefix, error);
                 setState({ products: [], status: ERROR })
             }
+        },
+        togglePick: (productId) => {
+            if (!productId) throw new Error(error_prefix + 'productId is required.');
+            let isProductPicked = state.products.filter(product => product.id === productId).picked;
+            console.log(isProductPicked);
         }
     }
 
