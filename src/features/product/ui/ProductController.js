@@ -1,6 +1,6 @@
 export const ProductController = ({ service }) => {
     const error_prefix = '[UI error] ProductController. ';
-    const { search, subscribe, togglePick } = service;
+    const { search, onProductsChange, togglePick } = service;
     return {
         renderResults: async (resultsHTMLComponent) => {
             if (!resultsHTMLComponent)
@@ -12,7 +12,7 @@ export const ProductController = ({ service }) => {
             const { IDLE, EMPTY, LOADING, ERROR, SUCCESS } = validStatuses;
             const { renderProductsGrid } = ProductView();
             //#region UI logic
-            subscribe((state) => {
+            onProductsChange((state) => {
                 switch (state.status) {
                     case EMPTY: isEmpty(); break;
                     case LOADING: isLoading('products'); break;
