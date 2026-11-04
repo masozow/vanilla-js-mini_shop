@@ -9,17 +9,19 @@ export const ProductService = ({ productRepo }) => {
         products: [],
         status: IDLE
     }
-    const pickedProducts = new Set();
+    let pickedProductsIdList = [];
     const productSignal = createSignal(initialState);
     const lastPickedProductSignal = createSignal({});
     let reqId = 0;
     let lastQuery = '';
     const viewState = () => {
-        const currentProducts = productSignal.get();
-        return currentProducts.map((product) => pickedProducts.has(product));
+        const currentProducts = productSignal.get().products;
+        const pickedProductsIdSet = new Set(pickedProductsIdList);
+        return currentProducts.map((product) => ({ ...product, picked: pickedProductsIdSet.has(product.id) }));
     }
     return {
         onProductChange: productSignal.subscribe,
+        onProductPicked: lastPickedProductSignal.subscribe,
         search: async (query) => {
             if (typeof query !== 'string') throw new Error(error_prefix, 'Query must be a string');
             const normalizedQuery = query.trim();
@@ -40,21 +42,28 @@ export const ProductService = ({ productRepo }) => {
                     productSignal.set({ products: [], status: EMPTY })
                     return;
                 }
-                productSignal.set({ products, status: SUCCESS })
+                productSignal.set({ products, status: SUCCESS });
+                console.log(viewState());
             } catch (error) {
                 if (currentReqId !== reqId) return;
                 console.error(error_prefix, error);
                 productSignal.set({ products: [], status: ERROR })
             }
         },
-        setPick: (productId, isPicked = true) => {
+        pickProductQuantity: ({ productId, quantity, isPicked = true }) => {
             if (!productId) throw new Error(error_prefix + 'productId is required.');
             const currentProducts = productSignal.get().products;
             const indexOfProductId = currentProducts.findIndex(product => product.id === productId);
             if (indexOfProductId === -1) return;
             const clickedProduct = currentProducts[indexOfProductId];
-            const pickedProduct = { ...clickedProduct, picked: isPicked };
-            pickedProducts.add(pickedProduct);
+            const pickedProduct = { ...clickedProduct, picked: isPicked, quantity };
+            let currentPickedProductsList = pickedProductsIdList;
+            if (pickedProduct.picked)
+                currentPickedProductsList = pickedProductsIdList.filter((id) => id !== productId);
+            else
+                currentPickedProductsList = [...pickedProductsIdList, productId];
+            pickedProductsIdList = [...currentPickedProductsList];
+            console.log(pickedProductsIdList);
             lastPickedProductSignal.set(pickedProduct);
         }
     }

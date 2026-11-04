@@ -1,6 +1,6 @@
 export const ProductController = ({ service, resultsHTMLComponent }) => {
     const error_prefix = '[UI error] ProductController. ';
-    const { search, onProductChange, togglePick } = service;
+    const { search, onProductChange, pickProductQuantity } = service;
     return {
         renderResults: async () => {
             if (!resultsHTMLComponent)
@@ -33,16 +33,20 @@ export const ProductController = ({ service, resultsHTMLComponent }) => {
         },
         pickProduct: () => {
             const actions = {
-                'pick': (id) => togglePick(Number(id))
+                'pick': ({ id, quantity }) => pickProductQuantity({ productId: Number(id), quantity })
             }
+
             resultsHTMLComponent.addEventListener('click', (e) => {
-                const btn = e.target.closest('[data-action]')
+                const btn = e.target.closest('[data-action]');
                 if (!btn) return;
                 const card = btn.closest('[data-component="product-card"]')
                 if (!card) return;
+                const input = card.querySelector('[data-input="product-quantity"]');
+                if (!input) return;
                 const id = Number(card.dataset.id);
                 const action = actions[btn.dataset.action];
-                action(id);
+                const quantity = Number(input.value);
+                action({ id, quantity });
             });
         }
     }

@@ -1,7 +1,7 @@
 import { esc } from "../../../../shared/utils/escapeHTML.js";
 export const ProductCard = (product) => {
     const { id, title, thumbnail, picked, outOfStock, dimensions, ...rest } = product;
-    const { width, height } = dimensions;
+    const { width, heigth } = dimensions;
     const presentationData = {
         dataComponent: 'product-card',
         activeClass: 'picked',
@@ -29,12 +29,13 @@ export const ProductCard = (product) => {
         src="${esc(thumbnail)}" 
         alt="${title}" 
         width="${esc(width)}"
-        heigth="${esc(height)}"
+        height="${esc(heigth)}"
         />
         <div>
             <label for="quantity-${esc(id)}">Qty.:</label>
             <input 
                 id="quantity-${esc(id)}"
+                data-input="product-quantity"
                 type="number"
                 min="1"
                 value="1"
@@ -51,7 +52,6 @@ export const ProductCard = (product) => {
         >
             ${presentationData.btnText(outOfStock, picked)}
         </button>
-        
     </article>
     `;
 };
