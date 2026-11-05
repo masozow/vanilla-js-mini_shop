@@ -18,10 +18,9 @@ document.addEventListener('DOMContentLoaded', async () => {
         //#endregion
         //Glueing code
         const cartRepo = LocalCartRepository('cart');
-        const cartService = CartService({ cartLocalRepo: cartRepo })
-        const { renderCart } = CartController({ cartResults, service: cartService })
+        const cartService = CartService({ cartLocalRepo: cartRepo });
+        const { renderCart } = CartController({ cartResults, service: cartService });
         const onProductPickedIntent = (data) => {
-
             const cartItem = mapProductToCartItem(data);
             console.log("Intent at main: ", cartItem);
             cartService.handleCart({ newItem: cartItem });
