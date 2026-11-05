@@ -42,8 +42,6 @@ export const ProductController = ({ service, resultsHTMLComponent }) => {
             const actions = {
                 'pick': ({ id, quantity }) => pickProductQuantity({ productId: Number(id), quantity })
             }
-
-
             resultsHTMLComponent.addEventListener('click', (e) => {
                 const btn = e.target.closest('[data-action]');
                 if (!btn) return;

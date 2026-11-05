@@ -3,7 +3,7 @@ import { CartItem } from "./features/cart/domain/CartItem.js";
 import { CartRow } from "./features/cart/ui/components/CartRow.js";
 import { LocalCartRepository } from "./features/cart/infrastructure/LocalCartRepository.js";
 document.addEventListener('DOMContentLoaded', async () => {
-    const error_prefix = '[Main] ';
+    const error_prefix = '[Main error] ';
     try {
         //#region DOM elements
         const productSearch = document.getElementById('product-search');
@@ -14,7 +14,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         const total = document.getElementById('total');
         //#endregion
         //Glueing code
-        await ProductModule({ productResults, productSearch });
+        const productService = await ProductModule({ productResults, productSearch });
         //#region Cart
         const Items = [{
             id: 1,
