@@ -8,6 +8,7 @@ export const CartController = ({ cartResults, service }) => {
     const { onCartChange, handleCart } = service;
     return {
         renderCart: (items) => {
+            onCartChange((cart) => console.log(cart));
             const CartItems = items.map((item) => CartItem(item));
             const cartList = List({ items: CartItems, Component: CartRow })
             cartResults.innerHTML = cartList;

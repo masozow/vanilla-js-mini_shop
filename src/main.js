@@ -4,6 +4,7 @@ import { CartRow } from "./features/cart/ui/components/CartRow.js";
 import { LocalCartRepository } from "./features/cart/infrastructure/LocalCartRepository.js";
 import { CartService } from "./features/cart/application/CartService.js";
 import { CartController } from "./features/cart/ui/CartController.js";
+import { mapProductToCartItem } from "./shared/mappers/ProductToCart.mapper.js";
 document.addEventListener('DOMContentLoaded', async () => {
     const error_prefix = '[Main error] ';
     try {
@@ -16,8 +17,14 @@ document.addEventListener('DOMContentLoaded', async () => {
         const total = document.getElementById('total');
         //#endregion
         //Glueing code
+        const cartRepo = LocalCartRepository('cart');
+        const cartService = CartService({ cartLocalRepo: cartRepo })
+        const { renderCart } = CartController({ cartResults, service: cartService })
         const onProductPickedIntent = (data) => {
-            console.log("Intent at main: ", data);
+
+            const cartItem = mapProductToCartItem(data);
+            console.log("Intent at main: ", cartItem);
+            cartService.handleCart({ newItem: cartItem });
         }
         const productService = await ProductModule({ productResults, productSearch, onProductPickedIntent });
         //#region Cart
@@ -55,13 +62,11 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
 
         ]
-        const cartRepo = LocalCartRepository('cart');
-        const cartService = CartService({ cartLocalRepo: cartRepo })
-        const { renderCart } = CartController({ cartResults, service: cartService })
+
         renderCart(Items);
         //#endregion
     } catch (error) {
         console.error(error_prefix, error);
     }
 });
-await import('./shared/test/index.js');
+// await import('./shared/test/index.js');
