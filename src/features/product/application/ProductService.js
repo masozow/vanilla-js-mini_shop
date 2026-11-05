@@ -14,10 +14,10 @@ export const ProductService = ({ productRepo }) => {
     const lastPickedProductSignal = createSignal({});
     let reqId = 0;
     let lastQuery = '';
-    const viewState = () => {
-        const currentProducts = productSignal.get().products;
+    const productsDisplayState = (data) => {
         const pickedProductsIdSet = new Set(pickedProductsIdList);
-        return currentProducts.map((product) => ({ ...product, picked: pickedProductsIdSet.has(product.id) }));
+        const mergedProductsState = data.map((product) => ({ ...product, picked: pickedProductsIdSet.has(product.id) }));
+        return mergedProductsState;
     }
     return {
         onProductChange: productSignal.subscribe,
@@ -42,8 +42,8 @@ export const ProductService = ({ productRepo }) => {
                     productSignal.set({ products: [], status: EMPTY })
                     return;
                 }
-                productSignal.set({ products, status: SUCCESS });
-                console.log(viewState());
+                const displayProducts = productsDisplayState(products);
+                productSignal.set({ products: displayProducts, status: SUCCESS });
             } catch (error) {
                 if (currentReqId !== reqId) return;
                 console.error(error_prefix, error);
@@ -56,14 +56,23 @@ export const ProductService = ({ productRepo }) => {
             const indexOfProductId = currentProducts.findIndex(product => product.id === productId);
             if (indexOfProductId === -1) return;
             const clickedProduct = currentProducts[indexOfProductId];
-            const pickedProduct = { ...clickedProduct, picked: isPicked, quantity };
             let currentPickedProductsList = pickedProductsIdList;
-            if (pickedProduct.picked)
-                currentPickedProductsList = pickedProductsIdList.filter((id) => id !== productId);
-            else
-                currentPickedProductsList = [...pickedProductsIdList, productId];
+            if (currentPickedProductsList.includes(productId)) {
+                //Only remove from the list if the user wants to remove it,
+                //we're not toggling since the product can only be picked or
+                //unpicked explicitly.
+                if (!isPicked) {
+                    currentPickedProductsList = pickedProductsIdList.filter((id) => id !== productId);
+                }
+            }
+            else {
+                //We put a guard to not add a product that's already being picked
+                if (!clickedProduct.picked)
+                    currentPickedProductsList = [...pickedProductsIdList, productId];
+            }
             pickedProductsIdList = [...currentPickedProductsList];
             console.log(pickedProductsIdList);
+            const pickedProduct = { ...clickedProduct, picked: isPicked, quantity };
             lastPickedProductSignal.set(pickedProduct);
         }
     }
