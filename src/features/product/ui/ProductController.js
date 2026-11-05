@@ -1,6 +1,6 @@
 export const ProductController = ({ service, resultsHTMLComponent }) => {
     const error_prefix = '[UI error] ProductController. ';
-    const { search, onProductChange, pickProductQuantity } = service;
+    const { search, onProductChange, onProductPicked, pickProductQuantity } = service;
     return {
         renderResults: async () => {
             if (!resultsHTMLComponent)
@@ -8,10 +8,9 @@ export const ProductController = ({ service, resultsHTMLComponent }) => {
             const { RenderStatuses } = await import("../../../shared/ui/components/RenderStatuses.js");
             const { validStatuses } = await import("../../../shared/dictionaries/validStatuses.js");
             const { ProductView } = await import("./ProductView.js");
+            const { renderProductsGrid, transformSpecificProductCard } = ProductView();
             const { isLoading, isError, isEmpty, isIdle, isSuccess } = RenderStatuses(resultsHTMLComponent);
             const { IDLE, EMPTY, LOADING, ERROR, SUCCESS } = validStatuses;
-            const { renderProductsGrid } = ProductView();
-            //#region UI logic
             onProductChange((state) => {
                 switch (state.status) {
                     case EMPTY: isEmpty(); break;
@@ -20,7 +19,15 @@ export const ProductController = ({ service, resultsHTMLComponent }) => {
                     case SUCCESS: isSuccess(renderProductsGrid(state.products)); break;
                     case IDLE: isIdle('products'); break;
                 }
-            })
+            });
+            onProductPicked((lastPickedProduct) => {
+                if (!lastPickedProduct) return;
+                const card = resultsHTMLComponent.querySelector(`[data-id="${lastPickedProduct.id}"]`)
+                if (!card) return;
+                const btn = card.querySelector("[data-action='pick']");
+                if (!btn) return;
+                transformSpecificProductCard({ product: lastPickedProduct, card, btn });
+            });
         },
         searchProducts: async (searchInput) => {
             if (!searchInput)
@@ -36,6 +43,7 @@ export const ProductController = ({ service, resultsHTMLComponent }) => {
                 'pick': ({ id, quantity }) => pickProductQuantity({ productId: Number(id), quantity })
             }
 
+
             resultsHTMLComponent.addEventListener('click', (e) => {
                 const btn = e.target.closest('[data-action]');
                 if (!btn) return;
@@ -46,7 +54,7 @@ export const ProductController = ({ service, resultsHTMLComponent }) => {
                 const id = Number(card.dataset.id);
                 const action = actions[btn.dataset.action];
                 const quantity = Number(input.value);
-                action({ id, quantity });
+                action({ id, quantity, isPicked: true });
             });
         }
     }

@@ -71,7 +71,6 @@ export const ProductService = ({ productRepo }) => {
                     currentPickedProductsList = [...pickedProductsIdList, productId];
             }
             pickedProductsIdList = [...currentPickedProductsList];
-            console.log(pickedProductsIdList);
             const pickedProduct = { ...clickedProduct, picked: isPicked, quantity };
             lastPickedProductSignal.set(pickedProduct);
         }

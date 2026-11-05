@@ -6,7 +6,7 @@ export const ProductCard = (product) => {
         dataComponent: 'product-card',
         activeClass: 'picked',
         disabledClass: 'disabled-card',
-        btnText: (noStock, picked) => noStock ? 'Out of stock' : (picked ? 'Add more' : 'Add')
+        btnText: (noStock, picked) => noStock ? 'Out of stock' : (picked ? 'Add +' : 'Add')
     }
     return `
     <article 

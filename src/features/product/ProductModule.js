@@ -4,9 +4,10 @@ import { HttpClient } from "../../shared/infrastructure/HttpClient.js";
 import { ApiProductRepository } from "./infrastructure/ApiProductRepository.js";
 export const ProductModule = async ({ productResults, productSearch }) => {
     const error_prefix = '[Feature error] ProductModule. ';
+    const productRepo = ApiProductRepository({ httpClient: HttpClient });
+    const productService = ProductService({ productRepo });
     try {
-        const productRepo = ApiProductRepository({ httpClient: HttpClient });
-        const productService = ProductService({ productRepo });
+
         const {
             searchProducts,
             renderResults,
