@@ -2,6 +2,8 @@ import { ProductModule } from "./features/product/ProductModule.js";
 import { CartItem } from "./features/cart/domain/CartItem.js";
 import { CartRow } from "./features/cart/ui/components/CartRow.js";
 import { LocalCartRepository } from "./features/cart/infrastructure/LocalCartRepository.js";
+import { CartService } from "./features/cart/application/CartService.js";
+import { CartController } from "./features/cart/ui/CartController.js";
 document.addEventListener('DOMContentLoaded', async () => {
     const error_prefix = '[Main error] ';
     try {
@@ -50,11 +52,10 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
 
         ]
-        const CartItems = Items.map((item) => CartItem(item));
-        const CartRows = CartItems.map((item) =>
-            CartRow(item)
-        );
-        cartResults.innerHTML = CartRows.join('');
+        const cartRepo = LocalCartRepository('cart');
+        const service = CartService({ cartLocalRepo: cartRepo })
+        const { renderCart } = CartController({ cartResults, service: CartService })
+        renderCart(Items);
         //#endregion
     } catch (error) {
         console.error(error_prefix, error);
