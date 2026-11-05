@@ -50,7 +50,7 @@ export const ProductService = ({ productRepo }) => {
                 productSignal.set({ products: [], status: ERROR })
             }
         },
-        pickProductQuantity: ({ productId, quantity, isPicked = true }) => {
+        pickProductQuantity: ({ productId, isPicked = true }) => {
             if (!productId) throw new Error(error_prefix + 'productId is required.');
             const currentProducts = productSignal.get().products;
             const indexOfProductId = currentProducts.findIndex(product => product.id === productId);
@@ -71,7 +71,7 @@ export const ProductService = ({ productRepo }) => {
                     currentPickedProductsList = [...pickedProductsIdList, productId];
             }
             pickedProductsIdList = [...currentPickedProductsList];
-            const pickedProduct = { ...clickedProduct, picked: isPicked, quantity };
+            const pickedProduct = { ...clickedProduct, picked: isPicked };
             lastPickedProductSignal.set(pickedProduct);
         }
     }

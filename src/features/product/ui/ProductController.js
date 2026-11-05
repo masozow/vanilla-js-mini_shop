@@ -1,4 +1,4 @@
-export const ProductController = ({ service, resultsHTMLComponent }) => {
+export const ProductController = ({ service, resultsHTMLComponent, onProductPickedIntent = undefined }) => {
     const error_prefix = '[UI error] ProductController. ';
     const { search, onProductChange, onProductPicked, pickProductQuantity } = service;
     return {
@@ -26,7 +26,12 @@ export const ProductController = ({ service, resultsHTMLComponent }) => {
                 if (!card) return;
                 const btn = card.querySelector("[data-action='pick']");
                 if (!btn) return;
+                const input = card.querySelector('[data-input="product-quantity"]');
+                if (!input) return;
+                const quantity = Number(input.value);
                 transformSpecificProductCard({ product: lastPickedProduct, card, btn });
+                if (onProductPickedIntent)
+                    onProductPickedIntent({ ...lastPickedProduct, quantity })
             });
         },
         searchProducts: async (searchInput) => {
@@ -53,6 +58,7 @@ export const ProductController = ({ service, resultsHTMLComponent }) => {
                 const action = actions[btn.dataset.action];
                 const quantity = Number(input.value);
                 action({ id, quantity, isPicked: true });
+
             });
         }
     }

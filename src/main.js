@@ -16,7 +16,10 @@ document.addEventListener('DOMContentLoaded', async () => {
         const total = document.getElementById('total');
         //#endregion
         //Glueing code
-        const productService = await ProductModule({ productResults, productSearch });
+        const onProductPickedIntent = (data) => {
+            console.log("Intent at main: ", data);
+        }
+        const productService = await ProductModule({ productResults, productSearch, onProductPickedIntent });
         //#region Cart
         const Items = [{
             id: 1,
