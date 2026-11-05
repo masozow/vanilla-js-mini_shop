@@ -56,12 +56,12 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         ]
         const cartRepo = LocalCartRepository('cart');
-        const service = CartService({ cartLocalRepo: cartRepo })
-        const { renderCart } = CartController({ cartResults, service: CartService })
+        const cartService = CartService({ cartLocalRepo: cartRepo })
+        const { renderCart } = CartController({ cartResults, service: cartService })
         renderCart(Items);
         //#endregion
     } catch (error) {
         console.error(error_prefix, error);
     }
 });
-// await import('./shared/test/index.js');
+await import('./shared/test/index.js');

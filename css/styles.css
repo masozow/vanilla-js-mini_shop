@@ -38,9 +38,15 @@ main section {
 }
 
 .cart-results {
+    height: 75vh;
+    max-height: initial;
     overflow-y: scroll;
-    display: grid;
-    grid-template-columns: 1fr 1fr;
+    scrollbar-darkshadow-color: rgb(40, 40, 40);
+}
+
+.list {
+    display: flex;
+    flex-direction: column;
 }
 
 section h1 {
