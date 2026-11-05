@@ -1,6 +1,4 @@
 import { ProductModule } from "./features/product/ProductModule.js";
-import { CartItem } from "./features/cart/domain/CartItem.js";
-import { CartRow } from "./features/cart/ui/components/CartRow.js";
 import { LocalCartRepository } from "./features/cart/infrastructure/LocalCartRepository.js";
 import { CartService } from "./features/cart/application/CartService.js";
 import { CartController } from "./features/cart/ui/CartController.js";
@@ -23,7 +21,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         const onProductPickedIntent = (data) => {
             const cartItem = mapProductToCartItem(data);
             console.log("Intent at main: ", cartItem);
-            cartService.handleCart({ newItem: cartItem });
+            cartService.addToCart({ newItem: cartItem });
         }
         const productService = await ProductModule({ productResults, productSearch, onProductPickedIntent });
         //#region Cart
