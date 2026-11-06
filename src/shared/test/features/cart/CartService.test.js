@@ -1,5 +1,6 @@
 import { describe, it, expect, silenced } from "../../miniTest.js";
 import { CartService } from "../../../../features/cart/application/CartService.js";
+import { CartItem } from "../../../../features/cart/domain/CartItem.js";
 await describe('CartService tests', async () => {
     const FakeLocalRepo = (key) => {
         let tempStorage = {
@@ -7,20 +8,20 @@ await describe('CartService tests', async () => {
         }
         return {
             getCart: () => {
-                return tempStorage[key];
+                return structuredClone(tempStorage[key]);
             },
             setCart: (value) => {
-                tempStorage[key] = value;
+                tempStorage[key] = structuredClone(value);
             }
         }
     }
     const cartLocalRepo = FakeLocalRepo('cart');
-    const { handleCart } = CartService({ cartLocalRepo });
-    const Items = [{
+    const { addToCart, removeFromCart, cleanCart } = CartService({ cartLocalRepo });
+    const RawItems = [{
         id: 1,
         name: 'Apple MagSafe Battery Pack - Apple',
         price: '99.99',
-        quantity: '5'
+        quantity: '5',
     },
     {
         id: 2,
@@ -40,7 +41,7 @@ await describe('CartService tests', async () => {
         id: 4,
         name: 'iPhone X - Apple',
         price: '899.99',
-        quantity: '37'
+        quantity: '37',
     },
     {
         id: 5,
@@ -49,17 +50,28 @@ await describe('CartService tests', async () => {
         quantity: '9'
     }
     ]
+    const Items = RawItems.map((item) => CartItem(item));
     await it('Add items to cart', async () => {
-        handleCart({ newItem: Items[0] });
+        addToCart({ newItem: Items[0] });
         expect(cartLocalRepo.getCart().length).toBe(1);
         expect(cartLocalRepo.getCart()[0].id).toBe(Items[0].id);
+        addToCart({ newItem: Items[1] });
+        expect(cartLocalRepo.getCart().length).toBe(2);
+        expect(cartLocalRepo.getCart()[1].id).toBe(Items[1].id);
     });
 
-    await it('Remove item from cart if it already exists (Toggle behavior)', async () => {
-        handleCart({ newItem: Items[1] });
+    await it('Increment quantity and subtotal of an already existing element', async () => {
+        addToCart({ newItem: Items[1] });
         expect(cartLocalRepo.getCart().length).toBe(2);
-        handleCart({ newItem: Items[1] });
-        expect(cartLocalRepo.getCart().length).toBe(1);
-        expect(cartLocalRepo.getCart()[0].id).toBe(Items[0].id);
+        expect(cartLocalRepo.getCart()[1].quantity).toBe(2 * Items[1].quantity);
     });
+    await it('Put quantity and subTotal to 0 if we remove the item', async () => {
+        removeFromCart({ oldItem: Items[1] });
+        expect(cartLocalRepo.getCart().length).toBe(2);
+        expect(cartLocalRepo.getCart()[1].quantity).toBe(0);
+    })
+    await it('Clean cart completely', async () => {
+        cleanCart();
+        expect(cartLocalRepo.getCart().length).toBe(0);
+    })
 });
