@@ -5,10 +5,12 @@ export const ProductView = () => {
         renderProductsGrid: (data) => {
             return CardsGrid({ data, Component: ProductCard });
         },
-        transformSpecificProductCard: ({ product, card, btn }) => {
+        transformSpecificProductCard: ({ product, card, btn, input }) => {
             const cardActiveClass = card.dataset.activeClass;
             const btnActiveText = btn.dataset.activeText;
             const btnInactiveText = btn.dataset.inactiveText;
+            const defaultValue = Number(input.dataset.defaultValue);
+            const quantity = Number(input.value);
             if (product.picked) {
                 card.classList.add(cardActiveClass);
                 btn.textContent = btnActiveText
@@ -17,7 +19,7 @@ export const ProductView = () => {
                 btn.textContent = btnInactiveText;
                 card.classList.remove(cardActiveClass);
             }
-
+            input.value = defaultValue;
         }
     }
 }

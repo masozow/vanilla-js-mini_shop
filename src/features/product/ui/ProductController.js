@@ -29,7 +29,7 @@ export const ProductController = ({ service, resultsHTMLComponent, onProductPick
                 const input = card.querySelector('[data-input="product-quantity"]');
                 if (!input) return;
                 const quantity = Number(input.value);
-                transformSpecificProductCard({ product: lastPickedProduct, card, btn });
+                transformSpecificProductCard({ product: lastPickedProduct, card, btn, input });
                 if (onProductPickedIntent)
                     onProductPickedIntent({ ...lastPickedProduct, quantity })
             });

@@ -13,10 +13,12 @@ document.addEventListener('DOMContentLoaded', async () => {
         const total = document.getElementById('total');
         //#endregion
         //Glueing code
-        const cartService = CartModule({ htmlResultsElement: cartResults });
+        const onRemoveItemIntent = (id) => {
+            productService.pickProductQuantity({ productId: Number(id), isPicked: false });
+        }
+        const cartService = CartModule({ htmlResultsElement: cartResults, onRemoveItemIntent });
         const onProductPickedIntent = (data) => {
             const cartItem = mapProductToCartItem(data);
-            console.log("Intent at main: ", cartItem);
             cartService.addToCart({ newItem: cartItem });
         }
         const productService = await ProductModule({ productResults, productSearch, onProductPickedIntent });

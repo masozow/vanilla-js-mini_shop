@@ -6,6 +6,8 @@ export const ProductCard = (product) => {
         dataComponent: 'product-card',
         activeClass: 'picked',
         disabledClass: 'disabled-card',
+        minQuantity: 1,
+        maxQuantity: Number(esc(rest.stock)),
         btnText: (noStock, picked) => noStock ? 'Out of stock' : (picked ? 'Add +' : 'Add')
     }
     return `
@@ -36,22 +38,23 @@ export const ProductCard = (product) => {
             <input 
                 id="quantity-${esc(id)}"
                 data-input="product-quantity"
+                data-default-value="${presentationData.minQuantity}"
                 type="number"
-                min="1"
-                value="1"
-                max=${Number(esc(rest.stock))}
+                min=${presentationData.minQuantity}
+                value=${presentationData.minQuantity}
+                max=${presentationData.maxQuantity}
             />
-        </div>
-        <button 
-            data-action='pick'
-            data-active-text="${presentationData.btnText(false, true)}"
-            data-inactive-text="${presentationData.btnText(false, false)}"
-            data-outOfStock-text="${presentationData.btnText(true, false)}"
-            aria-pressed="${picked ? 'true' : 'false'}"
-            ${outOfStock ? 'disabled' : ''}
-        >
-            ${presentationData.btnText(outOfStock, picked)}
-        </button>
-    </article>
+        </div >
+    <button
+        data-action='pick'
+        data-active-text="${presentationData.btnText(false, true)}"
+        data-inactive-text="${presentationData.btnText(false, false)}"
+        data-outOfStock-text="${presentationData.btnText(true, false)}"
+        aria-pressed="${picked ? 'true' : 'false'}"
+        ${outOfStock ? 'disabled' : ''}
+    >
+        ${presentationData.btnText(outOfStock, picked)}
+    </button>
+    </article >
     `;
 };
