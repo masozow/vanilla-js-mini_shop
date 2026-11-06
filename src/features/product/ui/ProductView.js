@@ -10,7 +10,7 @@ export const ProductView = () => {
             const btnActiveText = btn.dataset.activeText;
             const btnInactiveText = btn.dataset.inactiveText;
             const defaultValue = Number(input.dataset.defaultValue);
-            const quantity = Number(input.value);
+
             if (product.picked) {
                 card.classList.add(cardActiveClass);
                 btn.textContent = btnActiveText

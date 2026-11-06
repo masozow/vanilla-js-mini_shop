@@ -18,8 +18,12 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
         const cartService = CartModule({ htmlResultsElement: cartResults, onRemoveItemIntent });
         const onProductPickedIntent = (data) => {
-            const cartItem = mapProductToCartItem(data);
-            cartService.addToCart({ newItem: cartItem });
+            if (data.picked) {
+                const cartItem = mapProductToCartItem(data);
+                cartService.addToCart({ newItem: cartItem });
+            } else {
+                cartService.removeFromCart({ itemId: data.id });
+            }
         }
         const productService = await ProductModule({ productResults, productSearch, onProductPickedIntent });
         //#region Cart
