@@ -12,7 +12,6 @@ await describe('Cart Item tests', async () => {
         name: 'Beats Flex Wireless Earphones - Beats',
         price: '49.99',
         quantity: '50',
-        isDisabled: true
     },
     {
         id: 3,
@@ -25,7 +24,8 @@ await describe('Cart Item tests', async () => {
         id: 4,
         name: 'iPhone X - Apple',
         price: '899.99',
-        quantity: '37'
+        quantity: '37',
+        isDisabled: true
     },
     {
         id: 5,
@@ -33,7 +33,7 @@ await describe('Cart Item tests', async () => {
         price: '9.99',
         quantity: '9'
     }]
-    await it('Happy path', async () => {
+    await it('Checking for correct mapping and arithmetic operations', async () => {
         const { id, name, price, quantity, subTotal } = CartItem(mockItems[0]);
         expect(id).toBe(1);
         expect(name).toBe('Apple MagSafe Battery Pack - Apple');

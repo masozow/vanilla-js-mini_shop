@@ -1,8 +1,6 @@
 import { ProductModule } from "./features/product/ProductModule.js";
-import { LocalCartRepository } from "./features/cart/infrastructure/LocalCartRepository.js";
-import { CartService } from "./features/cart/application/CartService.js";
-import { CartController } from "./features/cart/ui/CartController.js";
 import { mapProductToCartItem } from "./shared/mappers/ProductToCart.mapper.js";
+import { CartModule } from "./features/cart/CartModule.js";
 document.addEventListener('DOMContentLoaded', async () => {
     const error_prefix = '[Main error] ';
     try {
@@ -15,9 +13,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         const total = document.getElementById('total');
         //#endregion
         //Glueing code
-        const cartRepo = LocalCartRepository('cart');
-        const cartService = CartService({ cartLocalRepo: cartRepo });
-        const { renderCart } = CartController({ cartResults, service: cartService });
+        const cartService = CartModule({ htmlResultsElement: cartResults });
         const onProductPickedIntent = (data) => {
             const cartItem = mapProductToCartItem(data);
             console.log("Intent at main: ", cartItem);
@@ -25,42 +21,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
         const productService = await ProductModule({ productResults, productSearch, onProductPickedIntent });
         //#region Cart
-        const Items = [{
-            id: 1,
-            name: 'Apple MagSafe Battery Pack - Apple',
-            price: '99.99',
-            quantity: '5'
-        },
-        {
-            id: 2,
-            name: 'Beats Flex Wireless Earphones - Beats',
-            price: '49.99',
-            quantity: '50',
-            isDisabled: true
-        },
-        {
-            id: 3,
-            name: 'Selfie Stick Monopod - SnapTech',
-            price: '12.99',
-            quantity: '11',
-            isDisabled: true
-        },
-        {
-            id: 4,
-            name: 'iPhone X - Apple',
-            price: '899.99',
-            quantity: '37'
-        },
-        {
-            id: 5,
-            name: 'Essence Mascara Lash Princess - Essence',
-            price: '9.99',
-            quantity: '9'
-        }
-
-        ]
-
-        renderCart(Items);
         //#endregion
     } catch (error) {
         console.error(error_prefix, error);

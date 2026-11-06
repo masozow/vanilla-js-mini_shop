@@ -4,12 +4,14 @@ export const CartService = ({ cartLocalRepo }) => {
     const { getCart, setCart } = cartLocalRepo;
     const currentItems = getCart();
     const cartSignal = createSignal(currentItems);
+    const lastRemovedItemIdSignal = createSignal(0);
     return {
         onCartChange: cartSignal.subscribe,
+        onItemRemoved: lastRemovedItemIdSignal.subscribe,
         addToCart: ({ newItem }) => {
             if (!newItem) throw new Error(error_prefix + ' newItem is required.');
             const currentCartItems = cartSignal.get();
-            const foundItemIndex = currentCartItems.findIndex((item) => item.id === newItem.id);
+            const foundItemIndex = currentCartItems.findLastIndex((item) => item.id === newItem.id && !item.isDisabled);
             let updatedCartItems;
             if (foundItemIndex === -1) {
                 updatedCartItems = [...currentCartItems, structuredClone(newItem)];
@@ -27,23 +29,26 @@ export const CartService = ({ cartLocalRepo }) => {
             cartSignal.set(updatedCartItems);
             setCart(updatedCartItems);
         },
-        removeFromCart: ({ oldItem }) => {
-            if (!oldItem) throw new Error(error_prefix + ' oldItem is required.');
+        removeFromCart: (itemId) => {
+            if (!itemId) throw new Error(error_prefix + ' itemId is required.');
             const currentCartItems = cartSignal.get();
-            const foundItemIndex = currentCartItems.findIndex((item) => item.id === oldItem.id);
+            const foundItemIndex = currentCartItems.findLastIndex((item) => item.id === itemId);
             if (foundItemIndex === -1) return;
             const updatedCartItems = currentCartItems.map((item, index) => {
                 if (index !== foundItemIndex) return item;
                 return {
                     ...item,
                     quantity: 0,
-                    subTotal: 0
+                    subTotal: 0,
+                    isDisabled: true
                 }
             })
             cartSignal.set(updatedCartItems);
+            lastRemovedItemIdSignal.set(itemId);
             setCart(updatedCartItems);
         },
         cleanCart: () => {
+            lastRemovedItemIdSignal.set(0);
             cartSignal.set([]);
             setCart([]);
         }

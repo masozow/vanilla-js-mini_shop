@@ -41,6 +41,7 @@ main section {
     height: 75vh;
     max-height: initial;
     overflow-y: scroll;
+    padding-right: 1rem;
     scrollbar-darkshadow-color: rgb(40, 40, 40);
 }
 
@@ -79,6 +80,7 @@ section .controls {
     height: 90vh;
     max-height: initial;
     overflow-y: scroll;
+    padding-right: 1rem;
     scrollbar-darkshadow-color: rgb(40, 40, 40);
 }
 
