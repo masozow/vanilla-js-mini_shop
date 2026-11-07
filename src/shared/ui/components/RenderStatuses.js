@@ -15,10 +15,10 @@ export const RenderStatuses = (results) => {
                     An error has ocurred, try again later.
                 </p>`
         },
-        isEmpty: () => {
+        isEmpty: (message = '') => {
             results.innerHTML = `
                 <p class='empty'>
-                    No data found.
+                    ${message !== '' ? message : 'No data found.'}
                 </p>`
         },
         isIdle: (featureName = '') => {

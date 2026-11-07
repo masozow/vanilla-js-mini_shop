@@ -7,7 +7,7 @@ export const CartService = ({ cartLocalRepo }) => {
     const lastRemovedItemIdSignal = createSignal(0);
     return {
         onCartChange: cartSignal.subscribe,
-        onItemRemoved: lastRemovedItemIdSignal.subscribe,
+        onItemIdRemoved: lastRemovedItemIdSignal.subscribe,
         addToCart: ({ newItem }) => {
             if (!newItem) throw new Error(error_prefix + ' newItem is required.');
             const currentCartItems = cartSignal.get();

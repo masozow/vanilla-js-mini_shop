@@ -4,15 +4,49 @@ export const CartController = ({ cartResults, service, onRemoveItemIntent = unde
     const error_prefix = "[UI error] CartController. ";
     if (!cartResults) throw new Error(error_prefix + 'cartResults HTML element is required');
     if (!service) throw new Error(error_prefix + ' service is required.');
-    const { onCartChange, removeFromCart } = service;
-    const { isSuccess } = RenderStatuses(cartResults);
-    const { renderCartList } = CartView();
+    const { onCartChange, removeFromCart, onItemIdRemoved } = service;
+    const { isSuccess, isEmpty } = RenderStatuses(cartResults);
+    const { renderCartList, renderCartRow, updateSpecificRow } = CartView();
     return {
         renderCart: () => {
+            const renderedIds = new Set();
+            let isFirstRender = true;
             onCartChange((cart) => {
-                isSuccess(renderCartList(cart))
+                console.log(cart);
+                if (!Array.isArray(cart)) throw new Error(error_prefix + 'Cart must be an array.');
+                if (cart.length === 0) {
+                    renderedIds.clear();
+                    isEmpty('Dare to add Items.');
+                    isFirstRender = true;
+                    true;
+                }
+                if (isFirstRender) {
+                    isSuccess(renderCartList(cart));
+                    cart.forEach(item => renderedIds.add(item.id));
+                    isFirstRender = false;
+                    return;
+                }
+                cart.forEach((item) => {
+                    if (!renderedIds.has(item.id)) {
+                        cartResults.insertAdjacentHTML('beforeend', renderCartRow(item))
+                        renderedIds.add(item.id);
+                    }
+                });
+            });
+            onItemIdRemoved((id) => {
+                if (id === undefined) throw new Error(error_prefix + 'id is required.');
+                const card = cartResults.querySelector(`[data-id="${id}"]`)
+                if (!card) return;
+                const btn = card.querySelector('[data-action="remove-from-cart"]')
+                if (!btn) return;
+                const quantity = card.querySelector('[data-item-display="quantity"]');
+                if (!quantity) return;
+                const subTotal = card.querySelector('[data-item-display="sub-total"]');
+                if (!subTotal) return;
+                updateSpecificRow({ card, btn, quantity, subTotal });
             })
         },
+
         removeItem: () => {
             const actions = {
                 'remove-from-cart': (itemId) => removeFromCart(Number(itemId))

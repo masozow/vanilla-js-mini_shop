@@ -5,12 +5,8 @@ export const CartRow = (cartItem) => {
     const presentationData = {
         dataComponent: 'cart-item',
         disabledClass: 'cart-row-disabled',
-        btn: (isDisabled) => !isDisabled ? `
-         <button
-            data-action="remove-from-cart"
-        >
-            X
-        </button>`: '<span>( - )</span>'
+        dataAction: 'remove-from-cart',
+        btnText: (isDisabled) => !isDisabled ? 'X' : '-'
     }
     const {
         id,
@@ -20,6 +16,7 @@ export const CartRow = (cartItem) => {
         subTotal,
         isDisabled
     } = cartItem;
+
     return `
     <article
         data-id='${esc(id)}'
@@ -27,13 +24,20 @@ export const CartRow = (cartItem) => {
         class='cart-row ${isDisabled ? presentationData.disabledClass : ''}'
         data-disabled-class="${presentationData.disabledClass}"
     >
-        ${presentationData.btn(isDisabled)}
+         <button
+            data-action="${presentationData.dataAction}"
+            data-active-text="${presentationData.btnText(false)}"
+            data-inactive-text="${presentationData.btnText(true)}"
+            ${isDisabled ? "disabled" : ""}
+        >
+            ${presentationData.btnText(isDisabled)}
+        </button>
         <p class='cart-item-name'>${esc(name)}</p>
         <div class='numbers'>
-            <p class='quantity'>${esc(quantity)} * ${esc(price)}</p>
-            <p>${esc(subTotal)}</p>
+            <p class='quantity'>
+            <span data-item-display="quantity">${esc(quantity)}</span> * ${esc(price)}</p>
+            <p data-item-display="sub-total">${esc(subTotal)}</p>
         </div>
-        
     </article>
     `;
 }
