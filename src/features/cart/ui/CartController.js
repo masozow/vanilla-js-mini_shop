@@ -38,8 +38,9 @@ export const CartController = ({ cartResults, service, onRemoveItemIntent = unde
                     isFirstRender = false;
                     return;
                 }
+                //need to create a composite-key with id and disabled state for items cache
                 cart.forEach((item) => {
-                    if (item.isDisabled && renderedItemsIds.has(item)) {
+                    if (item.isDisabled && renderedItemsIds.has(item.id)) {
                         cartResults.insertAdjacentHTML('beforeend', renderCartRow(item))
                         renderedItemsIds.add(item.id);
                     }
