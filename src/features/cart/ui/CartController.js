@@ -1,14 +1,14 @@
-import { CartView } from "./CartView.js";
-import { RenderStatuses } from "../../../shared/ui/components/RenderStatuses.js";
 export const CartController = ({ cartResults, service, onRemoveItemIntent = undefined }) => {
     const error_prefix = "[UI error] CartController. ";
     if (!cartResults) throw new Error(error_prefix + 'cartResults HTML element is required');
     if (!service) throw new Error(error_prefix + ' service is required.');
     const { onCartChange, removeFromCart, onItemIdRemoved } = service;
-    const { isSuccess, isEmpty } = RenderStatuses(cartResults);
-    const { renderCartList, renderCartRow, updateSpecificRow } = CartView();
     return {
-        renderCart: () => {
+        renderCart: async () => {
+            const { CartView } = await import("./CartView.js");
+            const { RenderStatuses } = await import("../../../shared/ui/components/RenderStatuses.js");
+            const { renderCartList, renderCartRow, updateSpecificRow } = CartView();
+            const { isSuccess, isEmpty } = RenderStatuses(cartResults);
             const renderedIds = new Set();
             let isFirstRender = true;
             onCartChange((cart) => {
@@ -46,7 +46,6 @@ export const CartController = ({ cartResults, service, onRemoveItemIntent = unde
                 updateSpecificRow({ card, btn, quantity, subTotal });
             })
         },
-
         removeItem: () => {
             const actions = {
                 'remove-from-cart': (itemId) => removeFromCart(Number(itemId))

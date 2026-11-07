@@ -16,7 +16,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         const onRemoveItemIntent = (id) => {
             productService.pickProductQuantity({ productId: Number(id), isPicked: false });
         }
-        const cartService = CartModule({ htmlResultsElement: cartResults, onRemoveItemIntent });
+        const cartService = await CartModule({ htmlResultsElement: cartResults, onRemoveItemIntent });
         const onProductPickedIntent = (data) => {
             if (data.picked) {
                 const cartItem = mapProductToCartItem(data);

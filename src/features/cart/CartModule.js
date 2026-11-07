@@ -1,7 +1,7 @@
 import { CartService } from "./application/CartService.js";
 import { LocalCartRepository } from "./infrastructure/LocalCartRepository.js";
 import { CartController } from "./ui/CartController.js";
-export const CartModule = ({ htmlResultsElement, onRemoveItemIntent = undefined }) => {
+export const CartModule = async ({ htmlResultsElement, onRemoveItemIntent = undefined }) => {
     const error_prefix = '[CartModule Error] ';
     if (!htmlResultsElement) throw new Error(error_prefix + ' htmlResultsElement is required.');
     const cartRepo = LocalCartRepository('cart');
@@ -15,7 +15,7 @@ export const CartModule = ({ htmlResultsElement, onRemoveItemIntent = undefined 
             service: cartService,
             onRemoveItemIntent
         });
-        renderCart();
+        await renderCart();
         removeItem();
     } catch (error) {
         console.error(error_prefix + error);
