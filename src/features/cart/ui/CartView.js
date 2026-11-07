@@ -12,14 +12,15 @@ export const CartView = () => {
             if (!item) throw new Error(error_prefix + 'Item is required.');
             return CartRow(item);
         },
-        updateSpecificRow: ({ card, btn, quantity, subTotal }) => {
+        updateSpecificRow: ({ card = { element, shouldDisable: true }, btn, quantity = { element, text }, subTotal = { element, text } }) => {
             if (!card || !btn || !quantity || !subTotal) throw new Error(error_prefix + 'All parameters ar required.');
-            const disabledClass = card.dataset.disabledClass;
+            const disabledClass = card.element.dataset.disabledClass;
             const inactiveText = btn.dataset.inactiveText;
             btn.textContent = inactiveText;
-            quantity.textContent = "0";
-            subTotal.textContent = "0";
-            card.classList.add(disabledClass);
+            quantity.element.textContent = quantity.text;
+            subTotal.element.textContent = subTotal.text;
+            if (card.shouldDisable)
+                card.element.classList.add(disabledClass);
         }
     }
 }
