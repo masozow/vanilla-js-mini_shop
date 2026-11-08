@@ -3,17 +3,19 @@ export const CartController = ({ cartResults, service, onRemoveItemIntent = unde
     if (!cartResults) throw new Error(error_prefix + 'cartResults HTML element is required');
     if (!service) throw new Error(error_prefix + ' service is required.');
     const { onCartChange, removeFromCart, onItemIdRemoved } = service;
-    const getRowDataById = (id) => {
+    const getActiveRowDataById = (id) => {
         if (id === undefined) throw new Error(error_prefix + 'id is required.');
-        const card = cartResults.querySelector(`[data-id="${id}"]`)
-        if (!card) return;
-        const btn = card.querySelector('[data-action="remove-from-cart"]')
+        const cards = cartResults.querySelectorAll(`[data-id="${id}"]`)
+        if (cards.length === 0) return null;
+        const activeCard = Array.from(cards).find(card => !card.classList.contains('disabled'));
+        if (!activeCard) return;
+        const btn = activeCard.querySelector('[data-action="remove-from-cart"]')
         if (!btn) return;
-        const quantity = card.querySelector('[data-item-display="quantity"]');
+        const quantity = activeCard.querySelector('[data-item-display="quantity"]');
         if (!quantity) return;
-        const subTotal = card.querySelector('[data-item-display="sub-total"]');
+        const subTotal = activeCard.querySelector('[data-item-display="sub-total"]');
         if (!subTotal) return;
-        return { card, btn, quantity, subTotal }
+        return { card: activeCard, btn, quantity, subTotal }
     }
     return {
         renderCart: async () => {
@@ -21,36 +23,37 @@ export const CartController = ({ cartResults, service, onRemoveItemIntent = unde
             const { RenderStatuses } = await import("../../../shared/ui/components/RenderStatuses.js");
             const { renderCartList, renderCartRow, updateSpecificRow } = CartView();
             const { isSuccess, isEmpty } = RenderStatuses(cartResults);
-            const renderedItemsIds = new Set();
+            let renderedLinesCount = 0;
             let isFirstRender = true;
             onCartChange((cart) => {
-                console.log(cart);
                 if (!Array.isArray(cart)) throw new Error(error_prefix + 'Cart must be an array.');
                 if (cart.length === 0) {
-                    renderedItemsIds.clear();
+                    renderedLinesCount = 0;
                     isEmpty('Dare to add Items.');
                     isFirstRender = true;
                     return;
                 }
                 if (isFirstRender) {
                     isSuccess(renderCartList(cart));
-                    cart.forEach(item => renderedItemsIds.add(item));
+                    renderedLinesCount = cart.length;
                     isFirstRender = false;
                     return;
                 }
-                //need to create a composite-key with id and disabled state for items cache
-                cart.forEach((item) => {
-                    if (item.isDisabled && renderedItemsIds.has(item.id)) {
-                        cartResults.insertAdjacentHTML('beforeend', renderCartRow(item))
-                        renderedItemsIds.add(item.id);
+
+                cart.forEach((item, index) => {
+                    const itemId = Number(item.id);
+                    if (index >= renderedLinesCount) {
+                        cartResults.insertAdjacentHTML('beforeend', renderCartRow(item));
+                        renderedLinesCount++;
+                        return;
                     }
-                    else {
-                        const rowData = getRowDataById(item.id);
+                    if (!item.isDisabled) {
+                        const rowData = getActiveRowDataById(itemId);
                         if (!rowData) return;
-                        const { card, btn, quantity, subTotal } = rowData;
+                        const { card: cardNode, btn, quantity, subTotal } = rowData;
                         updateSpecificRow({
                             card: {
-                                element: card,
+                                element: cardNode,
                                 shouldDisable: false
                             },
                             btn,
@@ -64,12 +67,12 @@ export const CartController = ({ cartResults, service, onRemoveItemIntent = unde
                             }
                         });
                     }
-
                 });
             });
             onItemIdRemoved((id) => {
                 if (id === undefined) throw new Error(error_prefix + 'id is required.');
-                const rowData = getRowDataById(id);
+                const itemId = Number(id);
+                const rowData = getActiveRowDataById(itemId);
                 if (!rowData) return;
                 const { card, btn, quantity, subTotal } = rowData;
                 updateSpecificRow({
@@ -87,7 +90,7 @@ export const CartController = ({ cartResults, service, onRemoveItemIntent = unde
                         text: "0"
                     }
                 });
-            })
+            });
         },
         removeItem: () => {
             const actions = {
@@ -96,14 +99,15 @@ export const CartController = ({ cartResults, service, onRemoveItemIntent = unde
             cartResults.addEventListener('click', (e) => {
                 const btn = e.target.closest('[data-action]');
                 if (!btn) return;
-                const card = btn.closest('[data-component="cart-item"]')
+                const card =
+                    btn.closest('[data-component="cart-item"]:not(.disabled):not([disabled])');
                 if (!card) return;
                 const id = card.dataset.id;
                 const action = actions[btn.dataset.action];
                 if (!action) return;
                 action(id)
                 if (onRemoveItemIntent)
-                    onRemoveItemIntent(id);
+                    onRemoveItemIntent(Number(id));
             });
         }
     }

@@ -19,8 +19,16 @@ export const CartView = () => {
             btn.textContent = inactiveText;
             quantity.element.textContent = quantity.text;
             subTotal.element.textContent = subTotal.text;
-            if (card.shouldDisable)
+            if (card.shouldDisable) {
                 card.element.classList.add(disabledClass);
+                card.element.setAtribute('disabled', 'true');
+                btn.textContent = btn.dataset.inactiveText;
+                btn.setAttribute('aria-pressed', 'false');
+            } else {
+                btn.textContent = btn.dataset.activeText || 'Remove';
+                btn.setAttribute('aria-pressed', 'true');
+            }
+
         }
     }
 }
