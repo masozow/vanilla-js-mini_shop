@@ -1,13 +1,27 @@
 import { createSignal } from "../../../shared/store/createSignal.js";
+import { getCartTotals } from "../domain/CartCalculations.js";
 export const CartService = ({ cartLocalRepo }) => {
     const error_prefix = "[Application error] CartService. ";
     const { getCart, setCart } = cartLocalRepo;
     const currentItems = getCart();
     const cartSignal = createSignal(currentItems);
+    const discountSignal = createSignal(0);
     const lastRemovedItemIdSignal = createSignal(0);
     return {
         onCartChange: cartSignal.subscribe,
         onItemIdRemoved: lastRemovedItemIdSignal.subscribe,
+        onTotalChange: (listener) => {
+            const listenerWrapper = () =>
+                listener(
+                    getCartTotals({
+                        items: cartSignal.get(),
+                        discount: discountSignal.get()
+                    })
+                );
+            cartSignal.subscribe(listenerWrapper);
+            discountSignal.subscribe(listenerWrapper);
+        }
+        ,
         addToCart: ({ newItem }) => {
             if (!newItem) throw new Error(error_prefix + ' newItem is required.');
             const currentCartItems = cartSignal.get();

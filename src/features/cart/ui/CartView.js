@@ -34,5 +34,8 @@ export const CartView = () => {
             if (!item) throw new Error(error_prefix + 'item is required.');
             card.outerHTML = CartRow(item);
         },
+        renderTotals: (items) => {
+
+        }
     }
 }

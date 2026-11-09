@@ -234,3 +234,9 @@ button:hover {
     background-color: rgb(0, 127, 114);
     color: whitesmoke;
 }
+
+.totals {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    width: 100%;
+}
