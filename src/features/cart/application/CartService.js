@@ -30,7 +30,7 @@ export const CartService = ({ cartLocalRepo }) => {
             setCart(updatedCartItems);
         },
         removeFromCart: (itemId) => {
-            if (!itemId) throw new Error(error_prefix + ' itemId is required.');
+            if (itemId === undefined) throw new Error(error_prefix + ' itemId is required.');
             const currentCartItems = cartSignal.get();
             const foundItemIndex = currentCartItems.findLastIndex((item) => item.id === itemId);
             if (foundItemIndex === -1) return;

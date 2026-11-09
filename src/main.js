@@ -32,4 +32,4 @@ document.addEventListener('DOMContentLoaded', async () => {
         console.error(error_prefix, error);
     }
 });
-await import('./shared/test/index.js');
+// await import('./shared/test/index.js');

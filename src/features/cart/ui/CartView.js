@@ -8,9 +8,9 @@ export const CartView = () => {
             if (!Array.isArray(items)) throw new Error(error_prefix + 'Items must be an array.');
             return List({ items, Component: CartRow })
         },
-        renderCartRow: (item) => {
+        renderCartRowAtEnd: ({ item, cartResults }) => {
             if (!item) throw new Error(error_prefix + 'Item is required.');
-            return CartRow(item);
+            cartResults.insertAdjacentHTML('beforeend', CartRow(item));
         },
         updateSpecificRow: ({ card = { element, shouldDisable: true }, btn, quantity = { element, text }, subTotal = { element, text } }) => {
             if (!card || !btn || !quantity || !subTotal) throw new Error(error_prefix + 'All parameters ar required.');
@@ -21,14 +21,13 @@ export const CartView = () => {
             subTotal.element.textContent = subTotal.text;
             if (card.shouldDisable) {
                 card.element.classList.add(disabledClass);
-                card.element.setAtribute('disabled', 'true');
+                card.element.setAttribute('disabled', 'true');
                 btn.textContent = btn.dataset.inactiveText;
                 btn.setAttribute('aria-pressed', 'false');
             } else {
-                btn.textContent = btn.dataset.activeText || 'Remove';
+                btn.textContent = btn.dataset.activeText;
                 btn.setAttribute('aria-pressed', 'true');
             }
-
         }
     }
 }

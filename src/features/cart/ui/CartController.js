@@ -2,58 +2,61 @@ export const CartController = ({ cartResults, service, onRemoveItemIntent = unde
     const error_prefix = "[UI error] CartController. ";
     if (!cartResults) throw new Error(error_prefix + 'cartResults HTML element is required');
     if (!service) throw new Error(error_prefix + ' service is required.');
+    const compositeKey = (id, isDisabled) => `${Number(id)}-${!!isDisabled}`;
     const { onCartChange, removeFromCart, onItemIdRemoved } = service;
-    const getActiveRowDataById = (id) => {
+    const shouldUpdateOrInsertRow = ({ item, cachedRenderedIds, updateRowFunction, insertRowAtLastFunction }) => {
+        if (!item || !cachedRenderedIds || !updateRowFunction || !insertRowAtLastFunction)
+            throw new Error(error_prefix + 'All parameters are required.');
+        if (!Array.isArray(cachedRenderedIds))
+            throw new Error(error_prefix + 'cachedRenderedIds must be an array like structure.');
+        if (item.isDisabled) return;
+        const lastRenderedIdPosition = cachedRenderedIds.lastIndexOf(compositeKey(item.id, false));
+        lastRenderedIdPosition === -1 ? insertRowAtLastFunction() : updateRowFunction();
+    }
+    const getLastRowDataById = ({ id, htmlElementToSearchAt }) => {
         if (id === undefined) throw new Error(error_prefix + 'id is required.');
-        const cards = cartResults.querySelectorAll(`[data-id="${id}"]`)
+        if (!htmlElementToSearchAt) throw new Error(error_prefix + 'htmlElementToSearchAt is required');
+        const cards = htmlElementToSearchAt.querySelectorAll(`[data-id="${id}"]`)
         if (cards.length === 0) return null;
-        const activeCard = Array.from(cards).find(card => !card.classList.contains('disabled'));
-        if (!activeCard) return;
-        const btn = activeCard.querySelector('[data-action="remove-from-cart"]')
+        const card = Array.from(cards).at(-1);
+        if (!card) return;
+        const btn = card.querySelector('[data-action="remove-from-cart"]')
         if (!btn) return;
-        const quantity = activeCard.querySelector('[data-item-display="quantity"]');
+        const quantity = card.querySelector('[data-item-display="quantity"]');
         if (!quantity) return;
-        const subTotal = activeCard.querySelector('[data-item-display="sub-total"]');
+        const subTotal = card.querySelector('[data-item-display="sub-total"]');
         if (!subTotal) return;
-        return { card: activeCard, btn, quantity, subTotal }
+        return { card, btn, quantity, subTotal }
     }
     return {
         renderCart: async () => {
             const { CartView } = await import("./CartView.js");
             const { RenderStatuses } = await import("../../../shared/ui/components/RenderStatuses.js");
-            const { renderCartList, renderCartRow, updateSpecificRow } = CartView();
+            const { renderCartList, updateSpecificRow, renderCartRowAtEnd } = CartView();
             const { isSuccess, isEmpty } = RenderStatuses(cartResults);
-            let renderedLinesCount = 0;
+            let renderedItemIDs = [];
             let isFirstRender = true;
             onCartChange((cart) => {
                 if (!Array.isArray(cart)) throw new Error(error_prefix + 'Cart must be an array.');
                 if (cart.length === 0) {
-                    renderedLinesCount = 0;
+                    renderedItemIDs = [];
                     isEmpty('Dare to add Items.');
                     isFirstRender = true;
                     return;
                 }
                 if (isFirstRender) {
                     isSuccess(renderCartList(cart));
-                    renderedLinesCount = cart.length;
+                    cart.forEach((item) => renderedItemIDs.push(compositeKey(item.id, item.isDisabled)));
                     isFirstRender = false;
                     return;
                 }
-
-                cart.forEach((item, index) => {
+                cart.forEach((item) => {
                     const itemId = Number(item.id);
-                    if (index >= renderedLinesCount) {
-                        cartResults.insertAdjacentHTML('beforeend', renderCartRow(item));
-                        renderedLinesCount++;
-                        return;
-                    }
-                    if (!item.isDisabled) {
-                        const rowData = getActiveRowDataById(itemId);
-                        if (!rowData) return;
-                        const { card: cardNode, btn, quantity, subTotal } = rowData;
+                    const updateRowFunction = () => {
+                        const { card, btn, quantity, subTotal } = getLastRowDataById({ id: itemId, htmlElementToSearchAt: cartResults });
                         updateSpecificRow({
                             card: {
-                                element: cardNode,
+                                element: card,
                                 shouldDisable: false
                             },
                             btn,
@@ -67,12 +70,23 @@ export const CartController = ({ cartResults, service, onRemoveItemIntent = unde
                             }
                         });
                     }
+                    shouldUpdateOrInsertRow({
+                        item,
+                        cachedRenderedIds: renderedItemIDs,
+                        updateRowFunction,
+                        insertRowAtLastFunction: () => {
+                            renderCartRowAtEnd({ item, cartResults });
+                            renderedItemIDs.push(compositeKey(item.id, item.isDisabled));
+                        }
+                    });
                 });
             });
             onItemIdRemoved((id) => {
                 if (id === undefined) throw new Error(error_prefix + 'id is required.');
                 const itemId = Number(id);
-                const rowData = getActiveRowDataById(itemId);
+                const keyPosition = renderedItemIDs.lastIndexOf(compositeKey(itemId, false));
+                if (keyPosition !== -1) renderedItemIDs[keyPosition] = compositeKey(itemId, true);
+                const rowData = getLastRowDataById({ id: itemId, htmlElementToSearchAt: cartResults });
                 if (!rowData) return;
                 const { card, btn, quantity, subTotal } = rowData;
                 updateSpecificRow({
