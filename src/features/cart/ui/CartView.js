@@ -28,6 +28,11 @@ export const CartView = () => {
                 btn.textContent = btn.dataset.activeText;
                 btn.setAttribute('aria-pressed', 'true');
             }
-        }
+        },
+        replaceCartRow: ({ card, item }) => {
+            if (!card) throw new Error(error_prefix + 'card is required.');
+            if (!item) throw new Error(error_prefix + 'item is required.');
+            card.outerHTML = CartRow(item);
+        },
     }
 }

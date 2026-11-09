@@ -32,7 +32,7 @@ export const CartController = ({ cartResults, service, onRemoveItemIntent = unde
         renderCart: async () => {
             const { CartView } = await import("./CartView.js");
             const { RenderStatuses } = await import("../../../shared/ui/components/RenderStatuses.js");
-            const { renderCartList, updateSpecificRow, renderCartRowAtEnd } = CartView();
+            const { renderCartList, updateSpecificRow, replaceCartRow, renderCartRowAtEnd } = CartView();
             const { isSuccess, isEmpty } = RenderStatuses(cartResults);
             let renderedItemIDs = [];
             let isFirstRender = true;
@@ -53,22 +53,8 @@ export const CartController = ({ cartResults, service, onRemoveItemIntent = unde
                 cart.forEach((item) => {
                     const itemId = Number(item.id);
                     const updateRowFunction = () => {
-                        const { card, btn, quantity, subTotal } = getLastRowDataById({ id: itemId, htmlElementToSearchAt: cartResults });
-                        updateSpecificRow({
-                            card: {
-                                element: card,
-                                shouldDisable: false
-                            },
-                            btn,
-                            quantity: {
-                                element: quantity,
-                                text: item.quantity
-                            },
-                            subTotal: {
-                                element: subTotal,
-                                text: item.subTotal
-                            }
-                        });
+                        const { card } = getLastRowDataById({ id: itemId, htmlElementToSearchAt: cartResults });
+                        replaceCartRow({ card, item })
                     }
                     shouldUpdateOrInsertRow({
                         item,

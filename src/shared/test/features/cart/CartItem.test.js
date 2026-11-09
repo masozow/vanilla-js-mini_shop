@@ -1,5 +1,5 @@
 import { describe, it, silenced, expect } from '../../miniTest.js';
-import { CartItem } from '../../../../features/cart/domain/CartItem.js';
+import { CartItem, CartItemNumbersToRender } from '../../../../features/cart/domain/CartItem.js';
 await describe('Cart Item tests', async () => {
     const mockItems = [{
         id: 1,
@@ -33,12 +33,21 @@ await describe('Cart Item tests', async () => {
         price: '9.99',
         quantity: '9'
     }]
+    await it('Floating point render function', async () => {
+        const { price, quantity, subTotal } = CartItem(mockItems[0]);
+        const { correctedPrice, correctedQuantity, correctedSubTotal } = CartItemNumbersToRender({ quantity, price, subTotal });
+        expect(correctedPrice).toBe(price / 100);
+        expect(correctedQuantity).toBe(quantity / 100);
+        expect(correctedSubTotal).toBe(subTotal / (100 * 100))
+    })
     await it('Checking for correct mapping and arithmetic operations', async () => {
         const { id, name, price, quantity, subTotal } = CartItem(mockItems[0]);
+        const { correctedPrice, correctedQuantity, correctedSubTotal } = CartItemNumbersToRender({ quantity, price, subTotal });
         expect(id).toBe(1);
         expect(name).toBe('Apple MagSafe Battery Pack - Apple');
-        expect(price).toBe(99.99);
-        expect(quantity).toBe(5);
-        expect(subTotal).toBe(499.95);
+        expect(correctedPrice).toBe(99.99);
+        expect(correctedQuantity).toBe(5);
+        expect(correctedSubTotal).toBe(499.95);
     })
+
 })
