@@ -25,7 +25,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 const cartItem = mapProductToCartItem(data);
                 cartService.addToCart({ newItem: cartItem });
             } else {
-                cartService.removeFromCart({ itemId: data.id });
+                cartService.removeFromCart(data.id);
             }
         }
         const productService = await ProductModule({ productResults, productSearch, onProductPickedIntent });

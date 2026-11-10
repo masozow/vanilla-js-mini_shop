@@ -10,3 +10,5 @@ export const correctCartTotalsForDisplay = ({ subTotal, discount, total }) => {
         correctedTotal: (total / (100 * 100)).toFixed(2)
     }
 }
+
+export const cartHasItems = (items) => items.some(item => !item.isDisabled);
