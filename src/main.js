@@ -30,12 +30,9 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
         const productService = await ProductModule({ productResults, productSearch, onProductPickedIntent });
         cartService.onCartChange((items) => {
-            if (items.length === 0) return;
-            console.log(items.some(item => !item.isDisabled));
-            items.some(item => !item.isDisabled)
+            (items.some(item => !item.isDisabled) && items.length !== 0)
                 ? purchaseButton.removeAttribute('disabled')
                 : purchaseButton.setAttribute('disabled', `true`)
-
         })
         purchaseButton.addEventListener('click', (e) => {
             cartService.cleanCart();
