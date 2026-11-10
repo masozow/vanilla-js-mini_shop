@@ -37,8 +37,8 @@ export const CartView = () => {
         },
         renderTotals: ({ data, totalsHTMLElement }) => {
             if (!data) throw new Error(error_prefix + 'data is required.');
-            const { total, subTotal } = data;
-            totalsHTMLElement.innerHTML = Totals({ total, subTotal })
+            const { total, subTotal, discount } = data;
+            totalsHTMLElement.innerHTML = Totals({ total, subTotal, discount })
         }
     }
 }
