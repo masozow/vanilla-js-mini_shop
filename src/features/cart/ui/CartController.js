@@ -44,7 +44,6 @@ export const CartController = ({ cartResults, totalsResults, service, onRemoveIt
             let isFirstRender = true;
             onTotalChange((data) => {
                 renderTotals({ data, totalsHTMLElement: totalsResults })
-                console.log(data);
             });
             onCartChange((cart) => {
                 if (!Array.isArray(cart)) throw new Error(error_prefix + 'Cart must be an array.');
