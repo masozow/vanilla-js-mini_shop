@@ -10,21 +10,45 @@ export const CartService = ({ cartLocalRepo }) => {
     return {
         onCartChange: cartSignal.subscribe,
         onItemIdRemoved: lastRemovedItemIdSignal.subscribe,
+        // This function lets the outside world subscribe to "totals" changes.
+        // `listener` is the function that'll be executed outside, with the data
+        // we send to it.
         onTotalChange: (listener) => {
+            // Wrapper: the function the signals will actually call.
+            // It's a closure, so it remembers `listener`, and to that listener
+            // is who we're sending the transformed data.
+            // The listener is outside the service.
             const listenerWrapper = () => {
+                // Getting the shape of the object we wanna send to whoever
+                // is listening to this event.
+                // Ignores the value the signal passes in; it reads both current
+                // values with get(), because totals depend on cart AND discount
                 const totals = getCartTotals({
                     items: cartSignal.get(),
                     discount: discountSignal.get()
                 })
-                return listener(
+                // Calls the real listener and passes to it the raw totals
+                // (subTotal, discount, total, still scaled)
+                listener(
                     totals
                 );
             }
-
-            cartSignal.subscribe(listenerWrapper);
-            discountSignal.subscribe(listenerWrapper);
-        }
-        ,
+            //We subscribe to both signals, by storing the 'listener wrapper' in both signals' registries.
+            //So each signal will execute this function whenever there's a change
+            //in its state. When that happens, we notify of the state change
+            //to the real listener outside the service. But this time we don't send the
+            //data that "set" will write in the signal, we send data we need outside,
+            //which has to be recalculated whenever either signal is triggered by a "set" event
+            const unsubscribeCart = cartSignal.subscribe(listenerWrapper);
+            const unsubscribeDiscount = discountSignal.subscribe(listenerWrapper);
+            //We store the unsubscribe function for both signals and package them
+            //in a single function to send it back to whoever is listening to this event.
+            //This function removes the wrapper from both signals,
+            return () => {
+                unsubscribeCart();
+                unsubscribeDiscount();
+            }
+        },
         addToCart: ({ newItem }) => {
             if (!newItem) throw new Error(error_prefix + ' newItem is required.');
             const currentCartItems = cartSignal.get();

@@ -16,7 +16,7 @@ export const CartModule = async ({ cartHtmlResultsElement, totalsHtmlResultsElem
             service: cartService,
             onRemoveItemIntent
         });
-        await renderCart();
+        const { stopAllSignals } = await renderCart();
         removeItem();
     } catch (error) {
         console.error(error_prefix + error);

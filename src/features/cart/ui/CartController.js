@@ -42,10 +42,11 @@ export const CartController = ({ cartResults, totalsResults, service, onRemoveIt
             const { isSuccess, isEmpty } = RenderStatuses(cartResults);
             let renderedItemIDs = [];
             let isFirstRender = true;
-            onTotalChange((data) => {
+            const stopTotals = onTotalChange((data) => {
                 renderTotals({ data, totalsHTMLElement: totalsResults })
             });
-            onCartChange((cart) => {
+            //stopTotals();
+            const stopCartChange = onCartChange((cart) => {
                 if (!Array.isArray(cart)) throw new Error(error_prefix + 'Cart must be an array.');
                 if (cart.length === 0) {
                     renderedItemIDs = [];
@@ -76,7 +77,7 @@ export const CartController = ({ cartResults, totalsResults, service, onRemoveIt
                     });
                 });
             });
-            onItemIdRemoved((id) => {
+            const stopOnItemRemoved = onItemIdRemoved((id) => {
                 if (id === undefined) throw new Error(error_prefix + 'id is required.');
                 const itemId = Number(id);
                 const keyPosition = renderedItemIDs.lastIndexOf(compositeKey(itemId, false));
@@ -100,6 +101,13 @@ export const CartController = ({ cartResults, totalsResults, service, onRemoveIt
                     }
                 });
             });
+            return {
+                stopAllSignals: () => {
+                    stopCartChange();
+                    stopOnItemRemoved();
+                    stopTotals();
+                }
+            }
         },
         removeItem: () => {
             const actions = {
