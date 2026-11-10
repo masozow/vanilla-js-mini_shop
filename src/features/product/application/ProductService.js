@@ -73,6 +73,9 @@ export const ProductService = ({ productRepo }) => {
             pickedProductsIdList = [...currentPickedProductsList];
             const pickedProduct = { ...clickedProduct, picked: isPicked };
             lastPickedProductSignal.set(pickedProduct);
+        },
+        clearProducts: () => {
+            productSignal.set(initialState);
         }
     }
 

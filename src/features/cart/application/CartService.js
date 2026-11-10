@@ -11,13 +11,16 @@ export const CartService = ({ cartLocalRepo }) => {
         onCartChange: cartSignal.subscribe,
         onItemIdRemoved: lastRemovedItemIdSignal.subscribe,
         onTotalChange: (listener) => {
-            const listenerWrapper = () =>
-                listener(
-                    getCartTotals({
-                        items: cartSignal.get(),
-                        discount: discountSignal.get()
-                    })
+            const listenerWrapper = () => {
+                const totals = getCartTotals({
+                    items: cartSignal.get(),
+                    discount: discountSignal.get()
+                })
+                return listener(
+                    totals
                 );
+            }
+
             cartSignal.subscribe(listenerWrapper);
             discountSignal.subscribe(listenerWrapper);
         }

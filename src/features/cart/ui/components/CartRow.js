@@ -37,7 +37,7 @@ export const CartRow = (cartItem) => {
         <div class='numbers'>
             <p class='quantity'>
             <span data-item-display="quantity">${esc(correctedQuantity)}</span> * ${esc(correctedPrice)}</p>
-            <p data-item-display="sub-total">${esc(correctedSubTotal)}</p>
+            <p data-item-display="sub-total">${esc(correctedSubTotal.toFixed(2))}</p>
         </div>
     </article>
     `;

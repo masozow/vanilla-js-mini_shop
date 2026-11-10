@@ -38,7 +38,7 @@ main section {
 }
 
 .cart-results {
-    height: 75vh;
+    height: 70vh;
     max-height: initial;
     overflow-y: scroll;
     padding-right: 1rem;
@@ -235,8 +235,8 @@ button:hover {
     color: whitesmoke;
 }
 
-.totals {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    width: 100%;
+.purchase-button {
+    padding: 0.2rem 0;
+    font-size: large;
+    font-weight: bold;
 }

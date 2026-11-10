@@ -1,9 +1,9 @@
-export const CartController = ({ cartResults, service, onRemoveItemIntent = undefined }) => {
+export const CartController = ({ cartResults, totalsResults, service, onRemoveItemIntent = undefined }) => {
     const error_prefix = "[UI error] CartController. ";
     if (!cartResults) throw new Error(error_prefix + 'cartResults HTML element is required');
     if (!service) throw new Error(error_prefix + ' service is required.');
     const compositeKey = (id, isDisabled) => `${Number(id)}-${!!isDisabled}`;
-    const { onCartChange, removeFromCart, onItemIdRemoved } = service;
+    const { onCartChange, removeFromCart, onItemIdRemoved, onTotalChange } = service;
     const shouldUpdateOrInsertRow = ({ item, cachedRenderedIds, updateRowFunction, insertRowAtLastFunction }) => {
         if (!item || !cachedRenderedIds || !updateRowFunction || !insertRowAtLastFunction)
             throw new Error(error_prefix + 'All parameters are required.');
@@ -32,10 +32,20 @@ export const CartController = ({ cartResults, service, onRemoveItemIntent = unde
         renderCart: async () => {
             const { CartView } = await import("./CartView.js");
             const { RenderStatuses } = await import("../../../shared/ui/components/RenderStatuses.js");
-            const { renderCartList, updateSpecificRow, replaceCartRow, renderCartRowAtEnd } = CartView();
+            const {
+                renderCartList,
+                updateSpecificRow,
+                replaceCartRow,
+                renderCartRowAtEnd,
+                renderTotals
+            } = CartView();
             const { isSuccess, isEmpty } = RenderStatuses(cartResults);
             let renderedItemIDs = [];
             let isFirstRender = true;
+            onTotalChange((data) => {
+                renderTotals({ data, totalsHTMLElement: totalsResults })
+                console.log(data);
+            });
             onCartChange((cart) => {
                 if (!Array.isArray(cart)) throw new Error(error_prefix + 'Cart must be an array.');
                 if (cart.length === 0) {

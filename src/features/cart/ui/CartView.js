@@ -1,5 +1,6 @@
 import { List } from "./components/List.js";
-import { CartRow } from "./components/CartRow.js";
+import { CartRow, Totals } from "./components/index.js";
+
 export const CartView = () => {
     const error_prefix = '[UI Error] CartView. ';
     return {
@@ -34,8 +35,10 @@ export const CartView = () => {
             if (!item) throw new Error(error_prefix + 'item is required.');
             card.outerHTML = CartRow(item);
         },
-        renderTotals: (items) => {
-
+        renderTotals: ({ data, totalsHTMLElement }) => {
+            if (!data) throw new Error(error_prefix + 'data is required.');
+            const { total, subTotal } = data;
+            totalsHTMLElement.innerHTML = Totals({ total, subTotal })
         }
     }
 }

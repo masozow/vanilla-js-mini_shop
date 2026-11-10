@@ -8,15 +8,18 @@ document.addEventListener('DOMContentLoaded', async () => {
         const productSearch = document.getElementById('product-search');
         const productResults = document.getElementById('product-results');
         const cartResults = document.getElementById('cart-results');
-        const subtotal = document.getElementById('subtotal');
-        const discount = document.getElementById('discount');
-        const total = document.getElementById('total');
+        const totalsResults = document.getElementById('totals-results');
+        const purchaseButton = document.getElementById('purchase-button');
         //#endregion
         //Glueing code
         const onRemoveItemIntent = (id) => {
             productService.pickProductQuantity({ productId: Number(id), isPicked: false });
         }
-        const cartService = await CartModule({ htmlResultsElement: cartResults, onRemoveItemIntent });
+        const cartService = await CartModule({
+            cartHtmlResultsElement: cartResults,
+            totalsHtmlResultsElement: totalsResults,
+            onRemoveItemIntent
+        });
         const onProductPickedIntent = (data) => {
             if (data.picked) {
                 const cartItem = mapProductToCartItem(data);
@@ -26,10 +29,22 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
         }
         const productService = await ProductModule({ productResults, productSearch, onProductPickedIntent });
+        cartService.onCartChange((items) => {
+            if (items.length === 0) return;
+            console.log(items.some(item => !item.isDisabled));
+            items.some(item => !item.isDisabled)
+                ? purchaseButton.removeAttribute('disabled')
+                : purchaseButton.setAttribute('disabled', `true`)
+
+        })
+        purchaseButton.addEventListener('click', (e) => {
+            cartService.cleanCart();
+            productService.clearProducts();
+        })
         //#region Cart
         //#endregion
     } catch (error) {
         console.error(error_prefix, error);
     }
 });
-await import('./shared/test/index.js');
+// await import('./shared/test/index.js');
