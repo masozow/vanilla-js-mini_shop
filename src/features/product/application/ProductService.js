@@ -75,6 +75,9 @@ export const ProductService = ({ productRepo }) => {
             lastPickedProductSignal.set(pickedProduct);
         },
         clearProducts: () => {
+            pickedProductsIdList = [];
+            lastQuery = '';
+            ++reqId;
             productSignal.set(initialState);
         }
     }
