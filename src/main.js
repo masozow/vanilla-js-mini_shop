@@ -1,9 +1,7 @@
 import { ProductModule } from "./features/product/ProductModule.js";
 import { mapProductToCartItem } from "./shared/mappers/ProductToCart.mapper.js";
 import { CartModule } from "./features/cart/CartModule.js";
-import { cartHasItems } from "./features/cart/domain/CartCalculations.js";
-import { CheckoutController } from "./features/checkout/ui/CheckoutController.js";
-import { CheckoutService } from "./features/checkout/application/CheckoutService.js";
+import { CheckoutModule } from "./features/checkout/CheckoutModule.js";
 document.addEventListener('DOMContentLoaded', async () => {
     const error_prefix = '[Main error] ';
     try {
@@ -37,18 +35,10 @@ document.addEventListener('DOMContentLoaded', async () => {
             cartService.cleanCart();
             console.log('Purchase made.');
         }
-        const checkoutService = CheckoutService({ onPurchaseDone });
-        const { onCanPurchaseChange, setCanPurchase, purchase } = checkoutService;
-        const { renderButton, bindActions } = CheckoutController({ service: checkoutService, checkoutResults: checkoutActions })
+        const checkoutService = await CheckoutModule({ checkoutResults: checkoutActions, onPurchaseDone });
         cartService.onCartChange((items) => {
-            setCanPurchase(cartHasItems(items))
+            checkoutService.setPayload(items);
         })
-        renderButton();
-        bindActions({ payload: cartService.cartItems });
-        // purchaseButton.addEventListener('click', (e) => {
-        //     cartService.cleanCart();
-        //     productService.clearProducts();
-        // })
         //#region Cart
         //#endregion
     } catch (error) {
