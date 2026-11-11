@@ -1,6 +1,9 @@
 import { ProductModule } from "./features/product/ProductModule.js";
 import { mapProductToCartItem } from "./shared/mappers/ProductToCart.mapper.js";
 import { CartModule } from "./features/cart/CartModule.js";
+import { cartHasItems } from "./features/cart/domain/CartCalculations.js";
+import { CheckoutController } from "./features/checkout/ui/CheckoutController.js";
+import { CheckoutService } from "./features/checkout/application/CheckoutService.js";
 document.addEventListener('DOMContentLoaded', async () => {
     const error_prefix = '[Main error] ';
     try {
@@ -9,7 +12,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         const productResults = document.getElementById('product-results');
         const cartResults = document.getElementById('cart-results');
         const totalsResults = document.getElementById('totals-results');
-        const purchaseButton = document.getElementById('purchase-button');
+        const checkoutActions = document.getElementById('checkout-actions');
         //#endregion
         //Glueing code
         const onRemoveItemIntent = (id) => {
@@ -29,15 +32,23 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
         }
         const productService = await ProductModule({ productResults, productSearch, onProductPickedIntent });
-        cartService.onCartChange((items) => {
-            (items.some(item => !item.isDisabled) && items.length !== 0)
-                ? purchaseButton.removeAttribute('disabled')
-                : purchaseButton.setAttribute('disabled', `true`)
-        })
-        purchaseButton.addEventListener('click', (e) => {
-            cartService.cleanCart();
+        const onPurchaseDone = () => {
             productService.clearProducts();
+            cartService.cleanCart();
+            console.log('Purchase made.');
+        }
+        const checkoutService = CheckoutService({ onPurchaseDone });
+        const { onCanPurchaseChange, setCanPurchase, purchase } = checkoutService;
+        const { renderButton, bindActions } = CheckoutController({ service: checkoutService, checkoutResults: checkoutActions })
+        cartService.onCartChange((items) => {
+            setCanPurchase(cartHasItems(items))
         })
+        renderButton();
+        bindActions({ payload: cartService.cartItems });
+        // purchaseButton.addEventListener('click', (e) => {
+        //     cartService.cleanCart();
+        //     productService.clearProducts();
+        // })
         //#region Cart
         //#endregion
     } catch (error) {

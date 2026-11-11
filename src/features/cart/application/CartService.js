@@ -9,6 +9,7 @@ export const CartService = ({ cartLocalRepo }) => {
     const lastRemovedItemIdSignal = createSignal(0);
     return {
         onCartChange: cartSignal.subscribe,
+        cartItems: cartSignal.get(),
         onItemIdRemoved: lastRemovedItemIdSignal.subscribe,
         // This function lets the outside world subscribe to "totals" changes.
         // `listener` is the function that'll be executed outside, with the data

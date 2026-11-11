@@ -1,4 +1,4 @@
-import { esc } from "../../../../shared/utils/escapeHTML"
+import { esc } from "../../../../shared/utils/escapeHTML.js"
 export const CheckoutActions = () => {
     return {
         PurchaseButton: ({ activeText, inactiveText, isActive = true }) => {
@@ -9,7 +9,7 @@ export const CheckoutActions = () => {
             return `
                     <button
                     data-action="purchase"
-                     data-active-class="${activeClass}"
+                    data-active-class="${esc(presentationData.activeClass)}"
                     data-active-text="${esc(presentationData.btnText(true))}"
                     data-inactive-text="${esc(presentationData.btnText(false))}"
                     class='purchase-button ${isActive ? presentationData.activeClass : ''}'

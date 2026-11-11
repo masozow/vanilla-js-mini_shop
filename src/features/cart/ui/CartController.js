@@ -64,6 +64,7 @@ export const CartController = ({ cartResults, totalsResults, service, onRemoveIt
                     const itemId = Number(item.id);
                     const updateRowFunction = () => {
                         const { card } = getLastRowDataById({ id: itemId, htmlElementToSearchAt: cartResults });
+                        if (!card) return;
                         replaceCartRow({ card, item })
                     }
                     shouldUpdateOrInsertRow({
