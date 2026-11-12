@@ -1,0 +1,5 @@
+{
+  "codeium.enableCodeLens": false,
+  "editor.inlineSuggest.enabled": false,
+  "liveServer.settings.port": 5500
+}

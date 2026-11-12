@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+    <link
+      rel="stylesheet"
+      href="/css/styles.css"
+      media="print"
+      onload="this.media = 'all'"
+    />
+    <noscript><link rel="stylesheet" href="/css/styles.css" /> </noscript>
+    <script type="module" src="/src/main.js"></script>
+    <title>Shopping cart</title>
+  </head>
+  <body>
+    <main>
+      <section id="product" class="product-section">
+        <div id="search-box" class="controls">
+          <label for="product-search" id="products-search-label"
+            >Search products</label
+          >
+          <input
+            id="product-search"
+            type="search"
+            placeholder="Search products..."
+          />
+        </div>
+        <div
+          id="product-results"
+          class="product-results"
+          aria-live="polite"
+        ></div>
+      </section>
+      <section id="cart" class="cart-section">
+        <h1>Cart</h1>
+        <div id="cart-results" class="cart-results"></div>
+        <div id="totals-results"></div>
+        <div id="checkout-actions" class="checkout-actions"></div>
+      </section>
+    </main>
+  </body>
+</html>
