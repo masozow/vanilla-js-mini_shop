@@ -7,13 +7,13 @@ export const CheckoutActions = () => {
             }
             return `
                     <button
-                    data-action=${esc(actionName)}
+                    data-action="${esc(actionName)}"
                     data-active-class="${esc(activeClass)}"
                     data-active-text="${esc(presentationData.btnText(true))}"
                     data-inactive-text="${esc(presentationData.btnText(false))}"
-                    class='${esc(className)} ${isActive ? presentationData.activeClass : ''}'
+                    class='${esc(className)} ${isActive ? activeClass : ''}'
                     ${isActive ? '' : 'disabled'}
-                    id=${esc(actionId)}
+                    id="${esc(actionId)}"
                     >
                         ${esc(presentationData.btnText(isActive))}
                     </button>

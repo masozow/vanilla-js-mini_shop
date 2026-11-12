@@ -34,7 +34,7 @@ export const CheckoutView = (resultsHTMLElement) => {
                 inactiveText: 'All clean',
                 isActive
             }));
-            const renderedButton = resultsHTMLElement.querySelector('[data-action="purchase"]');
+            const renderedButton = resultsHTMLElement.querySelector('[data-action="clear-cart"]');
             return renderedButton;
         },
     }

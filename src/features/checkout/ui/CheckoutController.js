@@ -4,7 +4,7 @@ export const CheckoutController = ({ checkoutResults, service }) => {
     if (!checkoutResults) throw new Error(error_prefix + 'checkoutResults HTML element is required.');
     if (!service) throw new Error(error_prefix + 'service is required.');
     const { renderPurchaseButton, renderClearCartButton, toggleActionButtonRender } = CheckoutView(checkoutResults);
-    const { onCanPurchaseChange, purchase } = service;
+    const { onCanPurchaseChange, onCanClearChange, purchase, clearCart } = service;
     return {
         renderPurchaseButton: () => {
             let button = null;
@@ -18,18 +18,18 @@ export const CheckoutController = ({ checkoutResults, service }) => {
         },
         renderClearCartButton: () => {
             let button = null;
-            onCanPurchaseChange((canPurchase) => {
+            onCanClearChange((canClear) => {
                 if (!button) {
-                    button = renderClearCartButton(canPurchase)
+                    button = renderClearCartButton(canClear)
                     return;
                 }
-                toggleActionButtonRender({ button, isActive: canPurchase });
+                toggleActionButtonRender({ button, isActive: canClear });
             })
         },
         bindActions: () => {
             const actions = {
                 'purchase': async () => { await purchase() },
-                'clear-cart': () => console.log('Clear cart')
+                'clear-cart': () => clearCart()
             }
             checkoutResults.addEventListener('click', async (e) => {
                 const btn = e.target.closest('[data-action]');

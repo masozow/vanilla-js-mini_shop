@@ -6,6 +6,7 @@
     --text-secondary: #a0a0a0;
     --accent-turquoise: #06b6d4;
     --accent-gold: #fbbf24;
+    --accent-red: rgb(128, 0, 0);
     --radius: 12px;
     --transition: all 0.2s ease-in-out;
 }
@@ -318,22 +319,42 @@ section .controls {
     background-color: #115e59;
 }
 
-.purchase-button {
+.checkout-actions {
+    display: flex;
+    width: 100%;
+    flex-direction: column;
+    gap: 0.3rem;
+}
+
+.checkout-actions button {
     width: 100%;
     padding: 0.75rem 0;
     font-size: 1.1rem;
     font-weight: bold;
-    background-color: var(--accent-gold);
-    color: #121212;
     border: none;
     border-radius: 8px;
     cursor: pointer;
     transition: var(--transition);
 }
 
+.purchase-button {
+    background-color: var(--accent-gold);
+    color: #121212;
+}
+
 .purchase-button:hover:not(:disabled) {
     background-color: #fcd34d;
     box-shadow: 0 4px 12px rgba(251, 191, 36, 0.2);
+}
+
+.clear-cart-button {
+    background-color: var(--accent-red);
+    color: var(--text-primary);
+}
+
+.clear-cart-button:hover:not(:disabled) {
+    background-color: rgb(160, 0, 0);
+    box-shadow: 0 4px 12px rgba(251, 36, 36, 0.2);
 }
 
 .disabled-card,

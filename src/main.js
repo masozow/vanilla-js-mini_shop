@@ -35,9 +35,13 @@ document.addEventListener('DOMContentLoaded', async () => {
             cartService.cleanCart();
             console.log('Purchase made.');
         }
-        const checkoutService = await CheckoutModule({ checkoutResults: checkoutActions, onPurchaseDone });
+        const onClearIntent = () => {
+            cartService.cleanCart();
+        }
+        const checkoutService = await CheckoutModule({ checkoutResults: checkoutActions, onPurchaseDone, onClearIntent });
         cartService.onCartChange((items) => {
             checkoutService.setPayload(items);
+            checkoutService.setCanClear(items);
         })
         //#region Cart
         //#endregion
