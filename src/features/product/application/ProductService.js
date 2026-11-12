@@ -61,10 +61,10 @@ export const ProductService = ({ productRepo }) => {
                 pickedProductsIdList = pickedProductsIdList.filter((id) => id !== _productId);
             }
             const clickedProduct = productSignal.get().products.find((product) => product.id === _productId);
-            console.dir({ _productId, isPicked, inList: pickedProductsIdList.includes(_productId), snapshotPicked: clickedProduct.picked });
+
             if (!clickedProduct) return;
             lastPickedProductSignal.set({ ...clickedProduct, picked: isPicked });
-            console.dir({ productId, isPicked, pickedProductsIdList });
+
         },
         clearProducts: () => {
             pickedProductsIdList = [];
