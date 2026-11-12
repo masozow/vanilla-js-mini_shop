@@ -52,27 +52,19 @@ export const ProductService = ({ productRepo }) => {
         },
         pickProductQuantity: ({ productId, isPicked = true }) => {
             if (!productId) throw new Error(error_prefix + 'productId is required.');
-            const currentProducts = productSignal.get().products;
-            const indexOfProductId = currentProducts.findIndex(product => product.id === productId);
-            if (indexOfProductId === -1) return;
-            const clickedProduct = currentProducts[indexOfProductId];
-            let currentPickedProductsList = pickedProductsIdList;
-            if (currentPickedProductsList.includes(productId)) {
-                //Only remove from the list if the user wants to remove it,
-                //we're not toggling since the product can only be picked or
-                //unpicked explicitly.
-                if (!isPicked) {
-                    currentPickedProductsList = pickedProductsIdList.filter((id) => id !== productId);
-                }
+            const _productId = Number(productId);
+            const isInList = pickedProductsIdList.includes(_productId);
+            if (isPicked && !isInList) {
+                pickedProductsIdList = [...pickedProductsIdList, _productId];
             }
-            else {
-                //We put a guard to not add a product that's already being picked
-                if (!clickedProduct.picked)
-                    currentPickedProductsList = [...pickedProductsIdList, productId];
+            if (!isPicked && isInList) {
+                pickedProductsIdList = pickedProductsIdList.filter((id) => id !== _productId);
             }
-            pickedProductsIdList = [...currentPickedProductsList];
-            const pickedProduct = { ...clickedProduct, picked: isPicked };
-            lastPickedProductSignal.set(pickedProduct);
+            const clickedProduct = productSignal.get().products.find((product) => product.id === _productId);
+            console.dir({ _productId, isPicked, inList: pickedProductsIdList.includes(_productId), snapshotPicked: clickedProduct.picked });
+            if (!clickedProduct) return;
+            lastPickedProductSignal.set({ ...clickedProduct, picked: isPicked });
+            console.dir({ productId, isPicked, pickedProductsIdList });
         },
         clearProducts: () => {
             pickedProductsIdList = [];
