@@ -22,6 +22,7 @@ export const ProductService = ({ productRepo }) => {
     return {
         onProductChange: productSignal.subscribe,
         onProductPicked: lastPickedProductSignal.subscribe,
+        setPickedIds: (pickedIds) => pickedProductsIdList = [...pickedIds],
         search: async (query) => {
             if (typeof query !== 'string') throw new Error(error_prefix, 'Query must be a string');
             const normalizedQuery = query.trim();
@@ -53,15 +54,7 @@ export const ProductService = ({ productRepo }) => {
         pickProductQuantity: ({ productId, isPicked = true }) => {
             if (!productId) throw new Error(error_prefix + 'productId is required.');
             const _productId = Number(productId);
-            const isInList = pickedProductsIdList.includes(_productId);
-            if (isPicked && !isInList) {
-                pickedProductsIdList = [...pickedProductsIdList, _productId];
-            }
-            if (!isPicked && isInList) {
-                pickedProductsIdList = pickedProductsIdList.filter((id) => id !== _productId);
-            }
             const clickedProduct = productSignal.get().products.find((product) => product.id === _productId);
-
             if (!clickedProduct) return;
             lastPickedProductSignal.set({ ...clickedProduct, picked: isPicked });
 

@@ -88,6 +88,7 @@ export const CartService = ({ cartLocalRepo }) => {
             cartSignal.set(updatedCartItems);
             lastRemovedItemIdSignal.set(itemId);
             setCart(updatedCartItems);
+            console.log('RemoveFromCart called for ID:', itemId)
         },
         cleanCart: () => {
             lastRemovedItemIdSignal.set(0);

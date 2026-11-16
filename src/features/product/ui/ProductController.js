@@ -58,7 +58,6 @@ export const ProductController = ({ service, resultsHTMLComponent, onProductPick
                 const action = actions[btn.dataset.action];
                 const quantity = Number(input.value);
                 action({ id, quantity, isPicked: true });
-
             });
         }
     }

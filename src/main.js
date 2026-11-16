@@ -40,6 +40,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
         const checkoutService = await CheckoutModule({ checkoutResults: checkoutActions, onPurchaseDone, onClearIntent });
         cartService.onCartChange((items) => {
+            const itemsIds = items.filter(item => !item.isDisabled).map((item) => item.id);
+            productService.setPickedIds(itemsIds)
             checkoutService.setPayload(items);
             checkoutService.setCanClear(items);
         })
