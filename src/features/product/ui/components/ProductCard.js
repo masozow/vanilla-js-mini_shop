@@ -50,7 +50,6 @@ export const ProductCard = (product) => {
         data-active-text="${presentationData.btnText(false, true)}"
         data-inactive-text="${presentationData.btnText(false, false)}"
         data-outOfStock-text="${presentationData.btnText(true, false)}"
-        aria-pressed="${picked ? 'true' : 'false'}"
         ${outOfStock ? 'disabled' : ''}
     >
         ${presentationData.btnText(outOfStock, picked)}

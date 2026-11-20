@@ -14,6 +14,3 @@ export const CartItem = ({ id, name, price, quantity, isDisabled = false }) => {
     }
     return item;
 }
-export const CartItemNumbersToRender = ({ quantity, price, subTotal }) => {
-    return { correctedQuantity: Number(quantity) / 100, correctedPrice: Number(price) / 100, correctedSubTotal: Number(subTotal) / (100 * 100) }
-}

@@ -1,284 +1,272 @@
-# AGENTS.md — Hallazgos de auditoría y plan de trabajo
+# AGENTS.md — vanilla-js-mini_shop
 
-Documento de traspaso para retomar el trabajo. Fecha: 2026-11-16.
+> Entry point for any agent or contributor. Read this file, `docs/constitution.md`, and the active spec before touching code.
+>
+> Status: Active
+> Last updated: 2026-11-20
+> Baseline: branch `dev`, commit `2f216a9` plus the documentation changes in this working tree.
 
-- Rama: `dev`
-- HEAD: `0ddc463` — `FIX: starting to use cart as single source of truth for picked products`
-- Árbol de trabajo: limpio.
-- Suite actual: `node src/shared/test/index.js` → **13/13 tests pasan**.
-- La revisión original se hizo sobre copias; este documento actualiza su estado contra el código actual.
+## 1. What this project is
 
-> Importante: los 13 tests no cubren `ProductService`, el cableado de `main.js`, el mapper, el almacenamiento corrupto ni la re-entrada de signals. Que pasen no significa que las grietas estén resueltas.
+A small shopping cart exercise built with vanilla JavaScript, HTML, and CSS. It has three independent features:
 
----
+- **Product**: debounced search against DummyJSON, loading/empty/error states, out-of-stock handling, and an add-to-cart action.
+- **Cart**: local-only state persisted in `localStorage`, merging repeated lines, exact integer money, and a retained history of additions and removals for audit.
+- **Checkout**: purchase and clear actions derived from the cart state.
 
-## 1. Cambios aplicados en `0ddc463` y su efecto
+The architecture is layered per feature (`domain`, `application`, `infrastructure`, `ui`). Features must not import each other. Shared code lives in `src/shared`. Composition belongs outside the features.
 
-Archivos: `CartService`, `ProductService`, `ProductController`, `main.js`.
+The project is intentionally beyond the original README in two places:
 
-1. `ProductService.setPickedIds(ids)` reemplaza la lista de ids marcados.
-2. `pickProductQuantity` ya no modifica `pickedProductsIdList`; solo emite `lastPickedProductSignal`.
-3. `main.js` sincroniza `cartService.onCartChange` → `productService.setPickedIds(ids activos)`.
-4. Se agregó un `console.log` de depuración en `CartService.removeFromCart`.
+- Product cards keep a quantity input and behave like a supermarket cart.
+- The cart keeps an audit history of additions and removals.
 
-Efecto real: el carrito pasa a ser el origen de los ids activos, lo cual es la dirección correcta. Pero la implementación quedó a mitad:
+## 2. Commands
 
-- `setPickedIds` solo actualiza una caché; **no emite ningún signal**. La UI de productos sigue actualizándose por el camino viejo (`onProductPicked`).
-- El rebote de quitar desde el carrito sigue existiendo (ver 3.2).
-- `main.js` sigue conteniendo el flujo y el puente entre features.
-- El `console.log` nuevo es ruido de depuración.
+| Purpose | How |
+|---|---|
+| Serve the app | Open the repository in VS Code and run Live Server (port `5500`, per `.vscode/settings.json`), or use any static file host. No Python, Node.js, or build step. |
+| Run tests | Uncomment the last line of `src/main.js` (`await import('./shared/test/index.js')`) and reload the served page. The suite prints `[PASS]`/`[FAIL]` and `report()` throws on failure. |
+| Run tests from DevTools | On the served page: `await import('/src/shared/test/index.js')`. |
+| Run harness meta-test | In `src/shared/test/index.js`, uncomment `await import('./harness.test.js');` and reload. It proves the harness catches a deliberate failure without turning the suite red. |
+| Architecture check: `shared` must not import features | Editor search, or `grep -rn "features/" src/shared --include=*.js` excluding `src/shared/test/`. |
+| Architecture check: feature-to-feature imports | Editor search, or `grep -rn "from .*features/" src/features --include=*.js`. |
+| Lint / format | Not configured. Do not add a linter or formatter without approval. |
 
----
+Requirements: a current browser and a static file host only. The app is native ES modules; there is no package manager, no Node.js runtime, no Python, and no build step.
 
-## 2. Scorecard de desacople (actualizado)
+> The harness records every failure, prints a summary, and `report()` throws an `AggregateError` when anything failed. There is no `test.html`; the suite is one commented import at the bottom of `src/main.js`. The meta-test import stays commented in `src/shared/test/index.js`.
 
-| Regla | Estado | Evidencia |
+## 3. Repository map
+
+```
+.
+├── AGENTS.md                  # This entry point
+├── docs/
+│   └── constitution.md        # Non-negotiable project principles
+├── specs/
+│   ├── spec_test_harness.md
+│   ├── spec_unit_tests.md
+│   ├── spec_integration_tests.md
+│   ├── spec_composition.md
+│   ├── spec_architecture.md
+│   ├── spec_product_quantity.md
+│   ├── spec_cart_audit_history.md
+│   └── spec_bug_fixes.md
+├── _refs/                     # Read-only SDD reference material
+├── index.html
+├── css/styles.css
+└── src/
+    ├── main.js                # Composition root (target: DOM + module creation + connectors only)
+    ├── composition/           # Composition root, connectors, and cross-feature adapters
+    ├── features/
+    │   ├── product/{application,domain,infrastructure,ui}
+    │   ├── cart/{application,domain,infrastructure,ui}
+    │   └── checkout/{application,domain,ui}
+    └── shared/{dictionaries,infrastructure,store,ui,utils,test}
+```
+
+## 4. Constitution
+
+The constitution lives in `docs/constitution.md`. It is short and non-negotiable. Summary:
+
+**Architecture and design**
+
+1. Vanilla platform only: ES modules, HTML, CSS, browser-run app and tests. No frameworks, libraries, bundlers, build step, package manager, Node.js, or Python.
+2. DDD: domain first, ubiquitous language, business rules in `domain`, no UI/storage/HTTP knowledge there.
+3. Hexagonal: application defines ports, infrastructure and UI are adapters, dependencies point inward.
+4. TDD: red, green, refactor; every behavior change starts with a failing test.
+5. DRY: one source of truth, no duplicated rules or scales, no premature deduplication.
+6. KISS: the simplest design that satisfies the active spec, no speculative abstraction.
+7. SOLID and Clean Code: one reason to change per function, small ports, dependency inversion, no dead code or debug leftovers.
+
+**Naming and human-readable decisions**
+
+8. Names are for humans: full descriptive names (`escapeHTML`, `removeFromCart`), no vague verbs or cryptic abbreviations.
+9. Comments explain the why, the trade-off, and how to fix the code. `CartService` is the reference.
+10. Every change has a traceable path: input → controller → application → domain → adapter, no hidden jumps or double writes.
+
+**Invariants**
+
+11. Feature isolation and one owner per fact: `product`, `cart`, and `checkout` never import each other; composition lives outside features; other features receive explicit input ports, not duplicated truth.
+12. Inject dependencies: `fetch`, storage, repositories, clocks, callbacks. Domain and application never touch the DOM or browser globals.
+13. Exact money: integer scaling, one set of scale constants, no floating-point totals.
+14. Untrusted input is escaped everywhere: API, storage, and user text.
+15. English only: code, identifiers, comments, docs, tests, and commit messages.
+
+## 5. SDD workflow
+
+This repository follows the Spec-Driven Development flow described in `_refs/README(1).md` and `_refs/prompts.md`:
+
+```
+Constitution → Spec → Clarification → Plan → Tasks → Implementation → Validation → Change
+```
+
+Rules:
+
+1. **No code before an active spec.** Read `docs/constitution.md` and the relevant `specs/spec_*.md` first.
+2. **Clarify before planning.** If a spec has open questions that affect behavior, ask one question at a time. Do not invent behavior.
+3. **Plan before tasks.** A plan is not stored in this repository yet; produce one in the conversation for the active spec before editing code.
+4. **Tasks are small and verifiable.** Each task must have a "Done when:" line and must be test-first.
+5. **Implement one task at a time.** Run the suite, report the result, mark the task, and stop.
+6. **Validate against requirements.** Walk the spec's `RF-*` IDs and state which test covers each one.
+7. **Changes start in the spec.** If a requirement changes, update the spec first and show the diff.
+
+## 6. Spec index
+
+Read the specs in this order unless a dependency says otherwise.
+
+| Order | Spec | Purpose | Depends on | Gate | Status |
+|---|---|---|---|---|---|
+| 1 | `specs/spec_test_harness.md` | Trustworthy runner, matchers, isolated tests | — | — | Implemented |
+| 2 | `specs/spec_architecture.md` | Layering rules, dependency checks, domain hygiene | Harness | — | In progress |
+| 3 | `specs/spec_bug_fixes.md` | Verified bugs and regression tests | Harness | — | In progress |
+| 4 | `specs/spec_unit_tests.md` | Domain, application, infrastructure, shared, UI string tests | Harness | — | Ready |
+| 5 | `specs/spec_composition.md` | Composition root, connectors, one-way projections, surgical updates | Architecture | — | Ready |
+| 6 | `specs/spec_integration_tests.md` | Controller/wiring integration, bounce, persistence, browser harness | Composition | — | Ready |
+| 7 | `specs/spec_product_quantity.md` | Quantity input contract and validation | Composition, Unit tests | — | Ready |
+| 8 | `specs/spec_cart_audit_history.md` | Add/remove history and persistence | Architecture, Unit tests | — | Ready |
+
+`Implemented` means the spec is covered and verified. `In progress` means part of it is implemented. `Ready` means the decisions are resolved and implementation can start. `Blocked` means an open decision in section 14 must be resolved first.
+
+## 7. Finding registry
+
+Use these IDs in specs, tests, commits, and validation reports.
+
+| ID | Finding | Primary spec |
 |---|---|---|
-| Una feature no importa a otra | ✅ | 0 imports entre features; solo `main.js` las compone |
-| Cada feature funciona sola (prueba de borrado) | ✅ | product, cart y checkout no se importan entre sí |
-| `domain` sin dependencias externas | ✅ | solo importa otros módulos del propio dominio |
-| `application` sin UI, infra ni DOM | ✅ | quedan `console.*` de depuración |
-| `ui` sin `infrastructure` | ✅ | — |
-| `shared` no depende de features | ❌ | único caso: `src/shared/mappers/ProductToCart.mapper.js` importa `features/cart/domain/CartItem.js` |
-| Dependencias inyectadas | ⚠️ | `HttpClient`, `fetch`, repos y callbacks sí; `LocalCartRepository` usa `localStorage` global |
-| Una sola fuente de verdad | ⚠️ | el carrito ya es origen de ids, pero quedan dos caminos de escritura y el rebote |
-| Dominio libre de UI | ❌ | `Product.picked`, `Product.dimensions`, `CartItem.isDisabled`, `CartItemNumbersToRender` |
-
-Verificación del único import `shared → feature`:
-
-```bash
-grep -rn "features/" src/shared --include=*.js | grep -v "test/"
-# src/shared/mappers/ProductToCart.mapper.js:1
-```
-
----
-
-## 3. Las seis grietas
-
-### 3.1 El mapper vive en `shared` y conoce `cart` — ABIERTA
-
-- `src/shared/mappers/ProductToCart.mapper.js:1-2` importa `CartItem`.
-- Es el único import de `shared` hacia una feature.
-- `main.js:2` lo importa para convertir producto → línea de carrito.
-
-Dirección recomendada:
-
-1. Mover el mapper a una carpeta de composición, p. ej. `src/composition/toCartLine.js`.
-2. Mejor aún: que `CartService.addToCart` reciba datos planos `{ id, name, price, quantity }` y construya el `CartItem` por dentro. El mapper de composición solo formatea datos y **no importa nada de cart**.
-3. Ojo con el escalado: los tests actuales pasan objetos `CartItem` ya escalados. Si `addToCart` empieza a construir el `CartItem`, hay que actualizar los tests a datos crudos o se escala dos veces.
-
-### 3.2 Dos fuentes de verdad y rebote — PARCIAL (y discrepancia de verificación)
-
-Lo que ya está bien:
-
-- `setPickedIds` elimina la escritura de la lista de ids desde `ProductService`.
-- Al arrancar, `createSignal.subscribe` invoca el listener inmediatamente, así que el carrito cargado de `localStorage` llega a productos.
-- Tras una búsqueda nueva, `productsDisplayState` marca `picked` usando los ids del carrito.
-
-Lo que sigue mal:
-
-- `main.js:16-18` sigue pasando `onRemoveItemIntent` a `CartModule`.
-- `CartController.js:113-129` ejecuta `removeFromCart` y después `onRemoveItemIntent`.
-- `main.js:24-31` reacciona a `onProductPicked` y, si `picked === false`, vuelve a llamar `cartService.removeFromCart`.
-- `ProductService` sigue usando `lastPickedProductSignal` como canal de eventos (`onProductPicked`, `pickProductQuantity`).
-- `setPickedIds` no emite signal, así que las tarjetas visibles solo cambian por el camino viejo. Hay dos mecanismos de sincronización.
-- `onItemIdRemoved` existe y lo usa `CartController` para la fila, pero `main.js` no lo usa como evento de dominio.
-
-#### Discrepancia sobre el doble `removeFromCart`
-
-El usuario probó en navegador y no vio ningún `console.log` duplicado. La verificación posterior con el `ProductController` real y un DOM mínimo confirma que **el doble llamado sí ocurre, pero es condicional**:
-
-- Ocurre cuando el producto quitado **está en los resultados de búsqueda actuales** (`productSignal.get().products` lo contiene) y su tarjeta existe en el DOM.
-- No ocurre si el producto no está en los resultados actuales: `pickProductQuantity` hace `return` porque `clickedProduct` es `undefined`.
-- Tampoco ocurre si la tarjeta no está en el DOM: `ProductController` retorna antes de emitir el intent.
-
-Reproducción fiel (servicios reales + `ProductController` real):
-
-```text
-RemoveFromCart called for ID: 1
-INTENT picked=false
-RemoveFromCart called for ID: 1
-```
-
-Cómo comprobarlo en el navegador:
-
-1. Buscar `phone`.
-2. Agregar un producto al carrito.
-3. Sin cambiar la búsqueda, quitarlo desde el carrito.
-4. Consola: aparecen dos `RemoveFromCart called for ID: ...`.
-5. Si antes de quitarlo se hace otra búsqueda que no lo incluya, aparece uno solo.
-
-Por qué es fácil no verlo: el segundo llamado es idempotente con el borrado lógico actual. La fila ya está `isDisabled`, así que se vuelve a desactivar sin cambio visual; solo hay doble escritura en `localStorage` y doble emisión de `lastRemovedItemIdSignal`.
-
-Dirección recomendada:
-
-1. Eliminar `onRemoveItemIntent` de `CartController` y `CartModule`; el clic solo llama `removeFromCart`.
-2. Eliminar `lastPickedProductSignal`, `onProductPicked` y `pickProductQuantity` de `ProductService`.
-3. `ProductController` emite un intent de agregar `{ product, quantity }` (o solo `{ product }` si se quita el input, ver 3.4).
-4. `setPickedIds(ids)` debe emitir un signal de ids; `ProductController` actualiza solo las tarjetas visibles (clase/texto), **sin re-renderizar la grilla**, para respetar el README: “un cambio del carrito nunca re-renderiza los resultados”.
-5. Quitar → solo carrito → ids → productos. Agregar → intent → carrito → ids → productos. Un solo sentido.
-
-Nota extra: `onProductPicked` se suscribe con el valor inicial `{}`, que es truthy. Hoy no rompe porque `querySelector('[data-id="undefined"]')` devuelve `null`, pero es frágil. Si se mantiene ese canal, validar `id`.
-
-### 3.3 `main.js` contiene lógica de flujo — ABIERTA
-
-- `onRemoveItemIntent` (`main.js:16-18`) usa `productService` antes de declararlo (`main.js:32`). Funciona solo por el orden temporal de los clics; si se hace clic mientras `ProductModule` aún carga, es un `ReferenceError` en TDZ y el listener está fuera del `try/catch`.
-- `onProductPickedIntent` (`main.js:24-31`) es el puente producto → carrito.
-- `onPurchaseDone` y `onClearIntent` (`main.js:33-40`) contienen el flujo de compra.
-- Todo vive en closures dentro de `DOMContentLoaded`; no se puede importar ni testear.
-
-Dirección recomendada: extraer a `src/composition/`:
-
-- `connectProductsToCart({ productService, cartService })`
-- `connectCartToCheckout({ cartService, checkoutService })`
-- `createCheckoutHandlers({ cartService, productService })`
-- `toCartLine(product)`
-
-`main.js` debe quedar con: obtener nodos DOM, crear módulos, llamar a los conectores. Sin lógica de flujo.
-
-### 3.4 La cantidad viaja por el DOM — PARCIAL
-
-- `ProductController.js:31` lee `input.value`.
-- `ProductController.js:34` manda `{ ...lastPickedProduct, quantity }` al intent.
-- `ProductView.js:22` resetea el input en el mismo paso.
-- `ProductService.pickProductQuantity` ya no acepta `quantity`, pero la cantidad sigue viniendo del DOM y viajando por el evento.
-
-Dato clave del README: **un campo de cantidad en la tarjeta de producto no forma parte del ejercicio**. La solución más limpia es quitar el input de `ProductCard` y agregar siempre `1`; el carrito ya fusiona líneas repetidas.
-
-Alternativa si se quiere conservar el campo: el controller debe mandar la cantidad explícita en el intent, y ningún servicio debe leer el DOM ni ignorar parte de su firma.
-
-### 3.5 Fugas hacia el dominio — ABIERTA
-
-- `src/features/product/domain/Product.js:1,15-16`: `picked` y `dimensions` son estado de UI / datos que no se usan.
-- `src/features/cart/domain/CartItem.js:12`: `isDisabled` es un borrado lógico que existe por la UI. Las filas quitadas quedan en la lista y en `localStorage`.
-- `src/features/cart/domain/CartItem.js:17-19`: `CartItemNumbersToRender` convierte para mostrar dentro del dominio.
-- `src/features/cart/domain/CartCalculations.js:6-11`: `correctCartTotalsForDisplay` también es formateo de UI dentro del dominio.
-- Escala monetaria `100` / `10000` repetida en `CartItem.js` y `CartCalculations.js`; merece una constante única (`MONEY_SCALE`, `CENT_SCALE` o helpers `toCents` / `fromCents`).
-- `CartRow.js:2` importa `CartItemNumbersToRender` desde el dominio.
-
-Decisión pendiente: borrado real vs. borrado lógico (ver sección 7).
-
-### 3.6 `createSignal` y re-entrada — ABIERTA
-
-`src/shared/store/createSignal.js:4-6`:
-
-```js
-const notify = (currentValue) => {
-    listeners.forEach(listener => listener(currentValue));
-}
-```
-
-El valor se captura antes del bucle. Verificado: un listener cambió el signal a `b`; el siguiente listener recibió `a`, aunque `get()` ya devolvía `b`.
-
-Arreglo mínimo: notificar leyendo el valor vivo dentro del bucle (`listeners.forEach(l => l(value))`) y, opcionalmente, una guarda para evitar re-entrada anidada. Test de re-entrada pendiente.
-
-Además, `CartService.js:12` expone `cartItems: cartSignal.get()` calculado una sola vez y nadie lo usa. Eliminar.
-
----
-
-## 4. Bugs verificados
-
-| Bug | Estado | Evidencia / arreglo |
-|---|---|---|
-| `alt="${title}"` sin `esc` ejecuta HTML | ❌ Abierto | Verificado: `alt="x" onerror="alert(1)"`. Usar `esc(title)` en `ProductCard.js:32` |
-| `console.dir` leía `clickedProduct.picked` antes del guard | ✅ Corregido | Eliminado en `85b32cb`; no queda en `ProductService` |
-| `console.log` de depuración en `removeFromCart` | ❌ Nuevo | `CartService.js:91`; quitar |
-| Query sin codificar | ❌ Abierto | `ApiProductRepository.js:7` concatena crudo. `"iphone 5s & x"` genera `...?q=iphone%205s%20&%20x`. `ProductService.js:40` además usa `query`, no `normalizedQuery` |
-| `localStorage` corrupto o no-array | ❌ Abierto | `LocalCartRepository.js:4-10`: `JSON.parse` devuelve `{...}`; `CartController` lanza `Cart must be an array.` y el carrito queda muerto. Validar `Array.isArray` y devolver `[]` en el catch |
-| `width`/`height` de imagen | ❌ Abierto | `ProductCard.js:3-4,33-34`: `heigth` mal escrito y `dimensions` es el tamaño físico del producto. Verificado `width="undefined" height="undefined"`. Quitar ambos atributos; el CSS ya reserva `height: 6rem` |
-| `HttpClient` imprime `response.text` | ❌ Abierto | `HttpClient.js:16`: `${response.text}` inserta el código de la función, no `statusText`. Usar `response.statusText` |
-| `aria-pressed` estático en producto | ❌ Abierto | `ProductCard.js:53`; `ProductView` no lo actualiza. El botón es “Add +”, no un toggle. Quitarlo |
-| Test de error de `HttpClient` débil | ❌ Abierto | `HttpClient.test.js:42-52`: pasa si no se lanza nada y solo comprueba el prefijo; no detecta el bug de `response.text` |
-
-Arreglo probado para el test de `HttpClient`:
-
-```js
-let message = '';
-try {
-    await silenced(() => HttpClient({ url: fakeUrl, fetch: fakeFetch }));
-} catch (error) {
-    message = error.message;
-}
-expect(message.includes('Status: 500 - Server error')).toBe(true);
-```
-
----
-
-## 5. Tests: estado y carencias
-
-- Pasan los 13 actuales.
-- El test de error de `HttpClient` no falla si el cliente deja de lanzar. Corregirlo.
-- Faltan, por orden de rentabilidad:
-  1. `ProductService` con repo falso: secuencia `IDLE → LOADING → SUCCESS`, `EMPTY`, `ERROR`, carrera de respuestas, vaciar input con petición en vuelo, `setPickedIds` + búsqueda.
-  2. `mapProductToCartItem` / `toCartLine` y `addToCart` con datos planos.
-  3. `LocalCartRepository` con storage inyectado: JSON corrupto, objeto, `null`.
-  4. Cableado (`connectProductsToCart`, `connectCartToCheckout`, handlers de compra) con servicios falsos.
-  5. Re-entrada de `createSignal`.
-  6. Escape del `alt` de `ProductCard`.
-
----
-
-## 6. Plan por fases
-
-### Fase 0 — bugs sueltos (bajo riesgo, commits independientes)
-
-1. `HttpClient`: `response.statusText`; test corregido.
-2. `LocalCartRepository({ key, storage })`: storage inyectable, `Array.isArray`, `return []` en catch; tests.
-3. Query: `ProductService` pasa `normalizedQuery`; `ApiProductRepository` hace `encodeURIComponent(query)`; test con `iphone 5s & x`.
-4. `ProductCard`: `esc(title)` en `alt`, quitar `width`/`height`/`dimensions`, quitar `aria-pressed`.
-5. Quitar `console.log` de `CartService` y `cartItems` sin uso.
-6. `createSignal`: notificar con valor vivo, guarda de re-entrada, test.
-
-### Fase 1 — una sola fuente de verdad
-
-1. Quitar `onRemoveItemIntent` de `CartController` y `CartModule`.
-2. Quitar `lastPickedProductSignal`, `onProductPicked` y `pickProductQuantity` de `ProductService`.
-3. Quitar el input de cantidad de `ProductCard` y agregar siempre `1` (recomendado, alineado con el README).
-4. `setPickedIds(ids)` emite un signal; `ProductController` actualiza solo las tarjetas visibles.
-5. Borrar el mapper de `shared`; crear `src/composition/toCartLine.js`.
-6. `CartService.addToCart` recibe datos planos y construye `CartItem`; actualizar tests (evitar doble escalado).
-
-### Fase 2 — composición
-
-1. Crear `src/composition/`: `connectProductsToCart`, `connectCartToCheckout`, `createCheckoutHandlers`, `toCartLine`.
-2. `main.js`: solo DOM, módulos y llamadas. Sin closures de flujo ni referencias adelantadas.
-3. Tests de cableado con fakes: ids sin `isDisabled`, payload al checkout, compra limpia carrito y productos una sola vez.
-
-### Fase 3 — higiene del dominio (requiere decisión)
-
-1. Borrado real vs. lógico. Si es real, simplificar `CartItem`, `Order`, `CartCalculations`, `CartController` y tests.
-2. Mover `CartItemNumbersToRender` y `correctCartTotalsForDisplay` a UI o a un formateador compartido.
-3. Una sola constante de escala monetaria.
-4. Sacar `picked` y `dimensions` de `Product`; `picked` se calcula en aplicación para la UI.
-
-### Fase 4 — tests restantes
-
-Los de la sección 5.
-
----
-
-## 7. Decisiones pendientes
-
-1. **Filas eliminadas del carrito**: borrado real (más cercano al README: “decreasing a line with quantity 1 removes it”) o mantener el borrado lógico actual.
-2. **Campo de cantidad en la tarjeta de producto**: quitarlo (recomendado; el README lo excluye) o conservarlo pasando la cantidad explícita por el intent.
-3. **Alcance de UI del carrito**: el README pide imagen (`thumbnail`), título y controles de aumentar/disminuir; hoy solo hay eliminar y no se muestra imagen. Confirmar si entra en el alcance.
-
----
-
-## 8. Gaps fuera de la revisión original
-
-- La línea del carrito no muestra `thumbnail` ni solo el `title`; muestra `title - brand category`.
-- No existen controles de aumentar/disminuir cantidad; solo eliminar.
-- El README dice explícitamente que el campo de cantidad en la tarjeta de producto no forma parte del ejercicio, pero está implementado.
-- `ProductCard` asume que `dimensions` existe (`ProductCard.js:4`). En la app no rompe porque `Product` le da `{}` por defecto, pero si se renderiza un producto crudo, lanza. Además, una excepción de render dentro de un listener de `productSignal.set` es capturada por el `catch` de `ProductService.search` y se reporta como estado `ERROR`, confundiendo un fallo de UI con un fallo de API.
-
----
-
-## 9. Notas para el siguiente agente
-
-- No des por cierta toda la revisión original: el estado cambió con `0ddc463`. Verificar contra el código y, cuando sea barato, contra el navegador.
-- El rebote está condicionado a que el producto quitado siga en los resultados actuales; probar ambos casos.
-- Ejecutar `node src/shared/test/index.js` después de cada cambio.
-- Mantener `product`, `cart` y `checkout` sin imports entre sí; la composición va en `src/composition/` o `main.js`.
-- Al cambiar la firma de `addToCart`, revisar el escalado de precios en los tests.
-- Actualizar este archivo cuando se cierren fases o cambien decisiones.
+| F-01 | `src/shared/mappers/ProductToCart.mapper.js` imports `cart/domain/CartItem.js`. | `spec_architecture` |
+| F-02 | Duplicate `picked` truth and the `removeFromCart` bounce through `onRemoveItemIntent`. | `spec_composition`, `spec_integration_tests` |
+| F-03 | Flow logic and TDZ-risk closures inside `main.js`. | `spec_composition` |
+| F-04 | Quantity travels through the DOM; service signatures must not ignore it. | `spec_product_quantity` |
+| F-05 | Domain/UI leaks: `Product.picked` and `dimensions`, `CartItemNumbersToRender`, repeated money scale. | `spec_architecture` |
+| F-06 | `createSignal` re-entrancy and stale `cartItems` snapshot. | `spec_unit_tests`, `spec_bug_fixes` |
+| B-01 | `alt="${title}"` is not escaped. | `spec_bug_fixes` |
+| B-02 | `console.dir` read `clickedProduct.picked` before the guard (fixed in `85b32cb`; keep a regression guard). | `spec_bug_fixes` |
+| B-03 | Query is not trimmed/encoded: `iphone 5s & x` becomes two parameters. | `spec_bug_fixes` |
+| B-04 | Corrupt or non-array `localStorage` makes the cart unusable. | `spec_bug_fixes` |
+| B-05 | `height`/`width` use the misspelled `heigth` and render `undefined`. | `spec_bug_fixes` |
+| B-06 | `HttpClient` prints `response.text` instead of `statusText`. | `spec_bug_fixes` |
+| B-07 | Product `aria-pressed` stays `false` and the button is not a toggle. | `spec_bug_fixes` |
+| B-08 | `HttpClient` error test passes when no error is thrown and does not detect B-06. | `spec_bug_fixes` |
+| T-01 | Test runner swallows failures and reports a false green run. | `spec_test_harness` |
+| T-02 | `CartService` tests share mutable state and depend on order. | `spec_test_harness` |
+| C-01 | Product feature has no tests. | `spec_unit_tests` |
+| C-02 | `main.js` wiring has no tests. | `spec_integration_tests` |
+| A-01 | Cart history is a partial soft delete: `removeFromCart` zeroes the removed quantity, so the on-screen history loses what was removed. | `spec_cart_audit_history` |
+| Q-01 | Quantity validation is absent (0, negative, `NaN`, empty). | `spec_product_quantity` |
+
+## 8. Locked decisions
+
+| ID | Decision |
+|---|---|
+| L-01 | The quantity input stays on product cards. This is intentionally beyond the original README. |
+| L-02 | The cart keeps removed rows visible on screen with `isDisabled: true`. It is an on-screen history, not a backend audit trail. |
+| L-03 | No frameworks, libraries, bundlers, or build step. |
+| L-04 | All code, comments, docs, tests, and commit messages are in English. |
+| L-05 | Features do not import each other; composition is outside features. |
+| L-06 | Checkout is part of the app even though the original README excludes it. |
+| L-07 | Tests come first. A behavior change without a spec update and a regression test is incomplete. |
+| L-08 | Untrusted text is escaped; money is integer-scaled; errors are logged with `console.error`, not `console.log`. |
+| L-09 | `isDisabled` is the only active/removed status. No `status` field and no timestamps. |
+| L-10 | The test suite runs from the commented dynamic import at the bottom of `src/main.js`; there is no test page. |
+| L-11 | Invalid quantity clamps to `1` at the UI; `CartItem` rejects non-positive and non-integer quantities. |
+| L-12 | The requested quantity is capped at `product.stock`. |
+| L-13 | Purchase and clear delete the whole local cart, including history. |
+| L-14 | The `picked` projection is an application read model in `ProductService`. The cart connector is its only writer, and it emits only the ids whose membership changed so the UI patches surgically. |
+| L-15 | The product-to-cart translation is a composition adapter (`toCartLine`). `shared` never imports a feature, and `CartService` builds its own `CartItem` from the plain line. |
+
+## 9. Working protocol for any agent
+
+Before work:
+
+1. Read this file and `docs/constitution.md`.
+2. Read the active spec and its dependency specs.
+3. Confirm the gate decisions for that spec are resolved. If not, ask.
+4. Produce a short plan: files, tests, expected failure, fix, verification.
+5. Do not edit code until the plan is accepted.
+
+During work:
+
+1. Write the failing test first. Run it and capture the failure.
+2. Implement the smallest change that makes it pass.
+3. Run the full suite. If the harness is still the old one, state explicitly that it may report a false green result.
+4. Run the architecture checks.
+5. For UI/integration changes, perform the manual browser check listed in the spec.
+6. Do not fix unrelated findings in the same task.
+
+After work:
+
+1. Report: requirement IDs covered, tests added, commands run, results, and files changed.
+2. Update the active spec with status and evidence.
+3. Mark the task done and stop. Do not start the next spec without instruction.
+
+## 10. Definition of done
+
+A task is done only when all of the following are true:
+
+- The relevant `RF-*` IDs are implemented or tested.
+- A test existed and failed before the fix, then passed after it.
+- The full suite reports zero failures (green summary) and does not throw.
+- Architecture checks pass.
+- The manual browser flow passes for UI or wiring changes.
+- No debug `console.log` remains.
+- The active spec is updated with evidence.
+- The change stays inside its feature or composition boundary.
+
+## 11. Hard rules and limits
+
+- Do not add runtime dependencies, frameworks, or a build step.
+- Do not add a test dependency without approval. Use the existing browser harness loaded from the commented import in `src/main.js`; do not add a test page, Node.js, Python, a package manager, or a bundler.
+- Keep JSDoc on every exported harness function and on non-obvious production functions. Comments must explain the reasoning and the path to a fix, following the `CartService` style.
+- Do not import one feature from another.
+- Do not import a feature from `src/shared`.
+- Do not put business logic in `main.js`; it is a composition root.
+- Do not read `localStorage`, `window`, or `document` from domain or application code.
+- Do not add `console.log` to production paths.
+- Do not change `_refs/`; it is reference material only.
+- Do not change behavior without a spec update.
+- Do not mix findings from different specs in one task.
+
+## 12. Reference material (`_refs/`)
+
+`_refs/` is read-only. Use it as the source of the SDD templates and workflow:
+
+- `_refs/AGENTS.md`: template for this file.
+- `_refs/spec.md`: template for every spec (context, actors, stories, EARS requirements, edge cases, out of scope, completion, open questions).
+- `_refs/prompts.md`: phase prompts and the one-task-at-a-time protocol.
+- `_refs/README(1).md`: SDD course overview and artifact flow.
+- `_refs/sdd.excalidraw`: board with the SDD flow, EARS patterns, and phase definitions.
+
+The app documentation is English. Do not copy Spanish template text into code, tests, or new docs.
+
+## 13. Current baseline and known state
+
+- The suite reports 18 tests through `src/shared/test/index.js`; the commented meta-test adds 9 harness tests when uncommented. There is no Node.js or Python step.
+- `miniTest.js` now records failures, prints a `[PASS]`/`[FAIL]` summary, throws an `AggregateError` from `report()`, provides `toEqual`/`toContain`/`toInclude`/`toThrow`/`toThrowAsync`/`not`, scoped `beforeEach`/`afterEach`, `runIsolated`, `spy`, `deferred`, `fakeStorage`, `fakeFetch`, and JSDoc on every exported function.
+- `CartService` tests now create a fresh repository and service before each test, so they no longer depend on order.
+- `src/shared/utils/moneyFormatter.js` owns `formatCartItemNumbers` and `formatCartTotals`; `cart/domain` no longer contains display formatting.
+- `aria-pressed` was removed from the product add button and the cart row update path.
+- The `picked` projection now emits a diff through `onPickedProductsChange`; `ProductController` does not subscribe yet, so the legacy `lastPickedProductSignal` path still repaints cards.
+- Removing a cart item can call `removeFromCart` twice when the removed product is still in the current search results and its card is in the DOM. If the product is not in the results, the bounce does not occur. This conditional behavior must be covered by integration tests.
+- The cart keeps rows with `isDisabled: true`, but `removeFromCart` still zeroes the removed quantity and `cleanCart` erases the history. The on-screen history behavior in `spec_cart_audit_history` is pending implementation.
+- Quantity validation is pending: the input still reaches the cart without clamping, and `pickProductQuantity` still drops `quantity`.
+- `src/composition/` does not exist yet; the target shape is defined in `specs/spec_composition.md`.
+- `ProductCard` still has the unescaped `alt` and the `width`/`height` bug.
+- `LocalCartRepository` uses global `localStorage`; injecting storage is a prerequisite for corrupt-storage tests.
+- There is no linter, formatter, or CI configuration.
+
+## 14. Open decisions
+
+No decisions are open. D1 is resolved below; the rest are locked in section 8.
+
+### Resolved decisions
+
+| ID | Resolution |
+|---|---|
+| D1 | `ProductService` owns the `picked` cache as a read model. The cart connector is its only writer; `setPickedIds` emits only the symmetric difference, and the controller patches only the changed cards. |
+| D2 | `isDisabled` boolean is the only active/removed status. No timestamps, no `status` field, no migration. |
+| D3 | No test page. The suite runs from the commented dynamic import in `src/main.js`; Playwright only if CI is added later. |
+| D4 | Invalid quantity clamps to `1` at the UI; `CartItem` rejects non-positive and non-integer quantities. |
+| D5 | The requested quantity is capped at `product.stock`. |
+| D6 | Purchase and clear delete the whole local cart, including history; the backend confirmation happens first. |

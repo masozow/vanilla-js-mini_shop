@@ -24,10 +24,8 @@ export const CartView = () => {
                 card.element.classList.add(disabledClass);
                 card.element.setAttribute('disabled', 'true');
                 btn.textContent = btn.dataset.inactiveText;
-                btn.setAttribute('aria-pressed', 'false');
             } else {
                 btn.textContent = btn.dataset.activeText;
-                btn.setAttribute('aria-pressed', 'true');
             }
         },
         replaceCartRow: ({ card, item }) => {

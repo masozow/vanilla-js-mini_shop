@@ -12,6 +12,7 @@ export const ProductService = ({ productRepo }) => {
     let pickedProductsIdList = [];
     const productSignal = createSignal(initialState);
     const lastPickedProductSignal = createSignal({});
+    const pickedChangesSignal = createSignal([]);
     let reqId = 0;
     let lastQuery = '';
     const productsDisplayState = (data) => {
@@ -22,7 +23,25 @@ export const ProductService = ({ productRepo }) => {
     return {
         onProductChange: productSignal.subscribe,
         onProductPicked: lastPickedProductSignal.subscribe,
-        setPickedIds: (pickedIds) => pickedProductsIdList = [...pickedIds],
+        // The cart connector is the only writer of this projection. The cache
+        // keeps the desired picked state so a new search renders correctly even
+        // when no card is on screen; the diff signal lets the controller patch
+        // only the cards that actually changed.
+        onPickedProductsChange: pickedChangesSignal.subscribe,
+        setPickedIds: (pickedIds) => {
+            const nextPickedIds = new Set(
+                [...pickedIds]
+                    .map(Number)
+                    .filter((id) => Number.isInteger(id) && id > 0)
+            );
+            const previousPickedIds = new Set(pickedProductsIdList);
+            const changedIds = [...new Set([...previousPickedIds, ...nextPickedIds])]
+                .filter((id) => previousPickedIds.has(id) !== nextPickedIds.has(id))
+                .map((id) => ({ id, picked: nextPickedIds.has(id) }));
+
+            pickedProductsIdList = [...nextPickedIds];
+            if (changedIds.length > 0) pickedChangesSignal.set(changedIds);
+        },
         search: async (query) => {
             if (typeof query !== 'string') throw new Error(error_prefix, 'Query must be a string');
             const normalizedQuery = query.trim();
@@ -60,7 +79,9 @@ export const ProductService = ({ productRepo }) => {
 
         },
         clearProducts: () => {
-            pickedProductsIdList = [];
+            // The cart connector clears the projection with setPickedIds([])
+            // when the cart empties. Writing the cache here would create a
+            // second writer and could hide a projection update.
             lastQuery = '';
             ++reqId;
             productSignal.set(initialState);

@@ -1,5 +1,5 @@
 import { esc } from "../../../../shared/utils/escapeHTML.js";
-import { CartItemNumbersToRender } from "../../domain/CartItem.js";
+import { formatCartItemNumbers } from "../../../../shared/utils/moneyFormatter.js";
 export const CartRow = (cartItem) => {
     const error_prefix = '[UI error] CartRow. ';
     if (!cartItem) throw new Error(error_prefix + 'cartItem element is required.');
@@ -17,7 +17,7 @@ export const CartRow = (cartItem) => {
         subTotal,
         isDisabled
     } = cartItem;
-    const { correctedPrice, correctedQuantity, correctedSubTotal } = CartItemNumbersToRender({ quantity, price, subTotal });
+    const { displayPrice, displayQuantity, displaySubTotal } = formatCartItemNumbers({ quantity, price, subTotal });
     return `
     <article
         data-id='${esc(id)}'
@@ -36,8 +36,8 @@ export const CartRow = (cartItem) => {
         <p class='cart-item-name'>${esc(name)}</p>
         <div class='numbers'>
             <p class='quantity'>
-            <span data-item-display="quantity">${esc(correctedQuantity)}</span> * ${esc(correctedPrice)}</p>
-            <p data-item-display="sub-total">${esc(correctedSubTotal.toFixed(2))}</p>
+            <span data-item-display="quantity">${esc(displayQuantity)}</span> * ${esc(displayPrice)}</p>
+            <p data-item-display="sub-total">${esc(displaySubTotal.toFixed(2))}</p>
         </div>
     </article>
     `;
